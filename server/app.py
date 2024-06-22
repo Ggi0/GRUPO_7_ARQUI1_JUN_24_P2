@@ -4,7 +4,10 @@ from flask_cors import CORS
 import sys
 import time
 import threading
-
+# sensor BME280
+from bmp280 import BMP280
+# sensor DHT11
+from smbus2 import SMBus
 
 
 
@@ -102,6 +105,8 @@ iniciar_stepper = True
 
 # Control creacion de api
 crear = True
+# variable global para controlar el estado del sensor
+sensor_barometrico = False
 
 #-------------------------FUNCIONES TEMPERATURA --------------------------
 
@@ -149,10 +154,46 @@ def Calidad_Aire():
     pass
 
 #---------------------FUNCIONES PRESION BAROMETRICA-----------------------
-def Presion_barometrica():
+# Enviar datos al ejecutable en arm 64 bits para obtener la presion barometrica
+def Presion_barometrica_arm():
+    # generar el archivo .s para¿
     pass
 
+# Enviar la señal de la presion Barometrica
+@app.route('/api/EncenderPresionBarometrica', methods=['POST'])
+def Encender_Presion_barometrica():
+    global sensor_barometrico
+    sensor_barometrico = True
     
+    data = request.json
+    data = data.get('presionBarometrica')
+    
+    if not isinstance(data, int):
+        return jsonify({"error": "Error en el parámetro 'presionBarometrica'"}), 400    
+    
+    print("Comenzando a leer la presion barometrica")
+    
+    # Init the BMP280
+    bus = SMBus(1)
+    bmp280 = BMP280(i2c_dev=bus)
+    
+    while sensor_barometrico:
+        temperatura = bmp280.get_temperature()
+        presion = bmp280.get_pressure()
+        time.sleep(10)
+        print(f'La temperatura es de: {temperatura}, 
+              la persion es de: {presion}')
+        
+    print("Presion barometrica apagada")
+    
+    return jsonify({"mensaje": "Presion barometrica Deshabilitada"}), 200
+
+# Apagar la señal de la presion barometrica
+@app.route('/api/ApagarPresionBarometrica', methods=['POST'])
+def Apagar_presion_barometrica():
+    global sensor_barometrico
+    sensor_barometrico = False
+    return jsonify({"mensaje": "Presion barometrica apagada"}), 200
 
 
 #TEMPERATURA 
@@ -380,7 +421,6 @@ def setup():
  
 try:
 
-    
     while True:
         time.sleep(1)  # Mantener el hilo principal dormido
 
@@ -394,3 +434,6 @@ try:
 except KeyboardInterrupt:
         running = False
         #GPIO.cleanup()
+except ImportError:
+    print("Error al importar las librerias necesarias")
+    running = False
