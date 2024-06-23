@@ -21,6 +21,8 @@ app = Flask(__name__)
 #* creamos una instancia de la clase CORS
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
+sensor_barometrico = False
+
 #* Funcion para encender el sensor seleccionado
 @app.route('/api/on', methods=['POST'])
 def On_Sensor():
@@ -33,6 +35,7 @@ def On_Sensor():
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
         print("Sensor 12 encendido")
+        On_Presure_Barometric()
     elif sensor == '13':
         print("Sensor 13 encendido")
     elif sensor == '14':
@@ -51,7 +54,30 @@ def On_Sensor():
 #* Funcion para apagar el sensor seleccionado
 @app.route('/api/off', methods=['POST'])
 def Off_Sensor():
-    pass
+    data = request.get_json()
+    sensor = data.get('sensor')
+    
+    if sensor is None:
+        return jsonify({'error': 'sensor and action are required'}), 400
+    
+    #* Aqui se debe de agregar la logica para apagar el sensor
+    if   sensor == '12':
+        print("Sensor 12 apagado")
+        Off_Presure_Barometric()
+    elif sensor == '13':
+        print("Sensor 13 apagado")
+    elif sensor == '14':
+        print("Sensor 14 apagado")
+    elif sensor == '15':
+        print("Sensor 15 apagado")
+    elif sensor == '16':
+        print("Sensor 16 apagado")
+    elif sensor == '17':
+        print("Sensor 17 apagado")
+    else:
+        return jsonify({'message': 'invalid sensor'}), 400
+    
+    return jsonify({'message': sensor})
 
 #* Funcion para obtener las estadisticas del sensor seleccionado
 @app.route('/api/stats', methods=['GET'])
@@ -62,6 +88,24 @@ def Estadistics_Sensor():
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
     pass
+
+def On_Presure_Barometric():
+    global sensor_barometrico
+    sensor_barometrico = True
+    
+    bus = SMBus(1)
+    bmp280 = BMP280(i2c_dev=bus)
+    
+    while sensor_barometrico:
+        temperatura = bmp280.get_temperature()
+        presion = bmp280.get_pressure()
+        time.sleep(10)
+        print(f'La temperatura es de: {temperatura}, 
+              la persion es de: {presion}')
+    
+def Off_Presure_Barometric():
+    global sensor_barometrico
+    sensor_barometrico = False
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:

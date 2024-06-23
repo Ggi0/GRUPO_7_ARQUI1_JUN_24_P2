@@ -13,6 +13,7 @@ import {
 // Registrar los componentes de Chart.js que se utilizarán
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+// Hacer importes nuevos aquí
 import { useState } from 'react';
 import axios from 'axios';
 
