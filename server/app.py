@@ -21,6 +21,89 @@ app = Flask(__name__)
 #* creamos una instancia de la clase CORS
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
+
+
+# ----------------------------VARIABLES ----------------------
+
+
+#globales para sensor de calidad de aire
+direccion_sensoraire = ""
+bus_sensoraire = ""
+valor_sensoraire = 0
+Switch_Sensoraire = False 
+
+#globales para sensor de temperatura
+
+
+
+# ------------------------- DECLARACION DE PUERTOS---------------------------
+
+#Pines GPIO 
+
+#Sensor de calidad de aire digital
+PIN_AIRE = 11          #GPIO 17
+
+#Sensor Temperatura
+PIN_TEMP = 17          #GPIO 4
+#Humedad
+
+HUMEDAD = 13
+
+
+# I2C
+#Sensor de calidad de aire I2C
+
+
+
+'''
+# LED verde es el pin 29 con GPIO 5
+# LED Roja es el pin 16 con GPIo 23
+PIN_IN1_STEPPER = 31
+PIN_IN2_STEPPER = 33
+PIN_IN3_STEPPER = 35
+PIN_IN4_STEPPER = 37
+PIN_IN5_LEDGREEN = 29
+PIN_IN6_LEDRED = 16
+
+#LUCES CUARTOS
+PIN_A = 18
+PIN_B = 22
+PIN_C = 23
+
+#SERVOMOTOR
+PIN_SERVO = 12
+
+# LASER 
+
+PIN_LASER = 38 #GPIO20
+
+# fotoresistencia
+PIN_F1 = 11 # GPIO17 
+PIN_F2 = 21 # GPIO19
+
+# buzzer
+PIN_BUZZER = 40 #GPIO21
+
+# Luz externa
+PIN_LEDf = 36 #GPIO16
+
+
+# ---- Sensor yair ------
+# Configurar los pines GPIO para los bits binarios
+bit0 = 8  # Pin 11 en la Raspberry Pi GPIO 14
+bit1 = 32 # Pin 12 en la Raspberry Pi GPIO 12
+bit2 = 7   # Pin 13 en la Raspberry Pi GPIO 4
+bit3 = 10  # Pin 15 en la Raspberry Pi GPIO 15
+
+
+# Configurar los pines GPIO para el sensor ultras�nico
+TRIG = 13  # Pin 16 en la Raspberry Pi GPIO 27
+ECHO = 15  # Pin 18 en la Raspberry�Pi�GPIO�22
+
+
+'''
+
+# ------------------------- FUNCIONES API ---------------------------
 #* Funcion para encender el sensor seleccionado
 @app.route('/api/on', methods=['POST'])
 def On_Sensor():
@@ -32,7 +115,9 @@ def On_Sensor():
     
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
-        print("Sensor 12 encendido")
+        print("Sensor Temperatura encendido")
+        
+        
     elif sensor == '13':
         print("Sensor 13 encendido")
     elif sensor == '14':
@@ -62,6 +147,18 @@ def Estadistics_Sensor():
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
     pass
+
+
+
+
+
+# ------------------------- FUNCIONES ---------------------------
+
+#* Funcion para encender el sensor de calidad de aire
+
+
+
+
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:
