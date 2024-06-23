@@ -2,6 +2,14 @@
 #* Los from son las librerias que vamos a utilizar en nuestro servidor pero solo algunas funciones de ellas
 from flask      import Flask, request, jsonify
 from flask_cors import CORS
+#import RPi.GPIO as GPIO
+import sys
+import time
+import threading
+# libreria para i2c
+import smbus2
+
+
 """
 from bmn280     import BMN280
 
@@ -30,10 +38,22 @@ bus_sensoraire = ""
 valor_sensoraire = 0
 Switch_Sensoraire = False 
 
+
 #globales para sensor de temperatura
+
+
+#globales para sensor de humedad
+
+
+#globales para luminosidad
+sensor_luminosidad = False
+
+#globales para sensor de viento
+
 
 #globales para sensor barometrico
 sensor_barometrico = False
+
 
 
 # ------------------------- DECLARACION DE PUERTOS---------------------------
@@ -43,67 +63,23 @@ sensor_barometrico = False
 #Sensor de calidad de aire digital
 PIN_AIRE = 11          #GPIO 17
 
-#Sensor Temperatura
+#Sensor Temperatura y humedad
 PIN_TEMP = 17          #GPIO 4
-#Humedad
 
-HUMEDAD = 13
+#Sensor de velocidad viento
+PIN_VIENTO = 22        #GPIO 25
+
+#Sensor de luminosidad digital
+PIN_LUZ = 13           #GPIO 17
 
 
 # I2C
-#Sensor de calidad de aire I2C
-
-#sd
-
-
-
-'''
-# LED verde es el pin 29 con GPIO 5
-# LED Roja es el pin 16 con GPIo 23
-PIN_IN1_STEPPER = 31
-PIN_IN2_STEPPER = 33
-PIN_IN3_STEPPER = 35
-PIN_IN4_STEPPER = 37
-PIN_IN5_LEDGREEN = 29
-PIN_IN6_LEDRED = 16
-
-#LUCES CUARTOS
-PIN_A = 18
-PIN_B = 22
-PIN_C = 23
-
-#SERVOMOTOR
-PIN_SERVO = 12
-
-# LASER 
-
-PIN_LASER = 38 #GPIO20
-
-# fotoresistencia
-PIN_F1 = 11 # GPIO17 
-PIN_F2 = 21 # GPIO19
-
-# buzzer
-PIN_BUZZER = 40 #GPIO21
-
-# Luz externa
-PIN_LEDf = 36 #GPIO16
+#Sensor de Calidad de aire I2C y de Luminosidad I2C
+PCF8591_ADDRESS = 0x48
+bus = smbus2.SMBus(1)
+#Sensor de Presion Barometrica I2C
 
 
-# ---- Sensor yair ------
-# Configurar los pines GPIO para los bits binarios
-bit0 = 8  # Pin 11 en la Raspberry Pi GPIO 14
-bit1 = 32 # Pin 12 en la Raspberry Pi GPIO 12
-bit2 = 7   # Pin 13 en la Raspberry Pi GPIO 4
-bit3 = 10  # Pin 15 en la Raspberry Pi GPIO 15
-
-
-# Configurar los pines GPIO para el sensor ultras�nico
-TRIG = 13  # Pin 16 en la Raspberry Pi GPIO 27
-ECHO = 15  # Pin 18 en la Raspberry�Pi�GPIO�22
-
-
-'''
 
 # ------------------------- FUNCIONES API ---------------------------
 
@@ -119,18 +95,18 @@ def On_Sensor():
     
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
-        print("Sensor 12 encendido")
-        On_Presure_Barometric()
+        print("Sensor Temperatura encendido")  
     elif sensor == '13':
-        print("Sensor 13 encendido")
+        print("Sensor Humedad encendido")
     elif sensor == '14':
-        print("Sensor 14 encendido")
+        print("Sensor Velocidad viento encendido")
     elif sensor == '15':
-        print("Sensor 15 encendido")
+        print("Sensor Luminosidad encendido")
+        On_luminosidad()
     elif sensor == '16':
-        print("Sensor 16 encendido")
+        print("Sensor Calidad de aire encendido")
     elif sensor == '17':
-        print("Sensor 17 encendido")
+        print("Sensor Presion Barometrica encendido")
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -147,18 +123,18 @@ def Off_Sensor():
     
     #* Aqui se debe de agregar la logica para apagar el sensor
     if   sensor == '12':
-        print("Sensor 12 apagado")
-        Off_Presure_Barometric()
+        print("Sensor Temperatura apagado")  
     elif sensor == '13':
-        print("Sensor 13 apagado")
+        print("Sensor Humedad apagado")
     elif sensor == '14':
-        print("Sensor 14 apagado")
+        print("Sensor Velocidad viento apagado")
     elif sensor == '15':
-        print("Sensor 15 apagado")
+        print("Sensor Luminosidad apagado")
+        Off_luminosidad()
     elif sensor == '16':
-        print("Sensor 16 apagado")
+        print("Sensor Calidad de aire apagado")
     elif sensor == '17':
-        print("Sensor 17 apagado")
+        print("Sensor Presion Barometrica apagado")
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -179,7 +155,52 @@ def Data_Sensor():
 
 #* Funcion para encender el sensor de calidad de aire
 
+#* Funcion para apagar el sensor de luminosidad
+def luminosidad_analogo(channel):
+    global sensor_luminosidad
+    global bus
+    global PCF8591_ADDRESS
+    
+    sensor_luminosidad = True
+    
+    if channel < 0 or channel > 3:
+        return -1
+
+    bus.write_byte(PCF8591_ADDRESS, 0x40 | channel)
+    bus.read_byte(PCF8591_ADDRESS)  # leer una vez para iniciar la conversiï¿½n
+    value = bus.read_byte(PCF8591_ADDRESS)
+    return value
+
+
+def On_luminosidad():
+    while sensor_luminosidad:
+        analog_value = luminosidad_analogo(1)  # Leer desde el canal AO1
+        print("Valor analogico leido desde AO1: ", analog_value)
+        
+        # Interpretaciï¿½n de los valores
+        if analog_value > 200:
+            print("Muy oscuro")
+        elif 150 < analog_value <= 200:
+            print("Oscuridad baja")
+        elif 100 < analog_value <= 150:
+            print("Luz media")
+        elif 50 < analog_value <= 100:
+            print("Luz alta")
+        else:
+            print("Muy iluminado")
+        
+        time.sleep(1)
+        
+        
+def Off_luminosidad():
+    global sensor_luminosidad
+    global bus
+    sensor_luminosidad = False
+    bus.close()
+    
 #* Funcion para encender el sensor Barometrico
+
+'''
 def On_Presure_Barometric():
     global sensor_barometrico
     sensor_barometrico = True
@@ -191,14 +212,22 @@ def On_Presure_Barometric():
         temperatura = bmp280.get_temperature()
         presion = bmp280.get_pressure()
         time.sleep(10)
-        print(f'La temperatura es de: {temperatura}, 
-              la persion es de: {presion}')
+        print(f'La temperatura es de: {temperatura}, la persion es de: {presion}')
+
+
+'''
+
 
 #* Funcion para apagar el sensor Barometrico   
+
+'''
 def Off_Presure_Barometric():
     global sensor_barometrico
     sensor_barometrico = False
     bus.close()
+
+'''
+
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:
