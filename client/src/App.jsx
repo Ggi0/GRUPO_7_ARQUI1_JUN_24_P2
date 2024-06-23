@@ -1,3 +1,4 @@
+
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -12,13 +13,31 @@ import {
 // Registrar los componentes de Chart.js que se utilizarán
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-//import { useState, useEffect } from 'react'
-//import axios from 'axios'
+import { useState } from 'react';
+import axios from 'axios';
 
 function App() {
 
   // ----------------- Codigo de los sensores ------------
-  
+  const [selectedSensor, setSelectedSensor] = useState("12");
+
+  const handleSelectChange = (event) => {
+    setSelectedSensor(event.target.value);
+  };
+
+  const handleButtonClick = (url) => {
+    axios.post(url, {
+      sensor: selectedSensor
+    })
+      .then(response => {
+        console.log(response.data);
+        // Manejar la respuesta aquí, como mostrar un mensaje de éxito
+      })
+      .catch(error => {
+        console.error('Hubo un error!', error);
+        // Manejar el error aquí, como mostrar un mensaje de error
+      });
+  };
 
   // ----------------- Graphic Interface -----------------
   const chartData = {
@@ -103,14 +122,17 @@ function App() {
                 <label className="form-label" style={{ marginTop: '10px', marginLeft: '5px' }}>
                   Seleccione Sensor:&nbsp;
                 </label>
-                <select className="form-select" style={{ marginTop: '10px', marginLeft: '5px' }} defaultValue="12">
+                <select className="form-select"
+                  style={{ marginTop: '10px', marginLeft: '5px' }}
+                  defaultValue="12"
+                  onChange={handleSelectChange}>
                   <optgroup label="Sensores">
                     <option value="12">Temperatura</option>
                     <option value="13">Humedad</option>
                     <option value="14">Velocidad viento</option>
-                    <option value="14">Luminosidad</option>
-                    <option value="14">Calidad de aire</option>
-                    <option value="14">Presión barométrica</option>
+                    <option value="15">Luminosidad</option>
+                    <option value="16">Calidad de aire</option>
+                    <option value="17">Presión barométrica</option>
                   </optgroup>
                 </select>
                 <button
@@ -124,6 +146,7 @@ function App() {
                     background: 'rgb(26,205,11)',
                     width: '94px',
                   }}
+                  onClick={() => handleButtonClick('http://127.0.0.1:8000/api/on')}
                 >
                   Encender
                 </button>
@@ -138,6 +161,7 @@ function App() {
                     width: '94px',
                     background: 'rgb(188,24,24)',
                   }}
+                  onClick={() => handleButtonClick('http://127.0.0.1:8000/api/off')}
                 >
                   Apagar
                 </button>
@@ -152,6 +176,7 @@ function App() {
                     background: 'rgb(22,118,187)',
                     width: '94px',
                   }}
+                  onClick={() => handleButtonClick('http://127.0.0.1:8000/api/data')}
                 >
                   Calcular
                 </button>
@@ -165,6 +190,7 @@ function App() {
                     marginLeft: '5px',
                     width: '94px',
                   }}
+                  onClick={() => handleButtonClick('http://127.0.0.1:8000/api/stats')}
                 >
                   Graficar
                 </button>
