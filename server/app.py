@@ -53,6 +53,8 @@ HUMEDAD = 13
 # I2C
 #Sensor de calidad de aire I2C
 
+#sd
+
 
 
 '''
