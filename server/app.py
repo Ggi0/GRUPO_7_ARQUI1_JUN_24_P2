@@ -71,6 +71,7 @@ PIN_LUZ = 13           #GPIO 17
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
 
+
 #Sensor de Presion Barometrica I2C
 i2c = busio.I2C(board.SCL, board.SDA)
 bmp280 = Adafruit_BMP280_I2C(i2c, address=0x76)
@@ -203,7 +204,7 @@ def On_luminosidad():
     datos = []
 
     while sensor_luminosidad:
-        analog_value = luminosidad_analogo(1)  # Leer desde el canal AO1
+        analog_value = Luminosidad_analogo(1)  # Leer desde el canal AO1
         print("Valor analogico leido desde AO1: ", analog_value)
         
         """
