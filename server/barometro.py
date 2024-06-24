@@ -1,53 +1,31 @@
 import time
-from bmp280 import BMP280  # Asumiendo que 'bmp280' es un módulo personalizado para BMP280
+import board
+import busio
+from adafruit_bmp280 import Adafruit_BMP280_I2C
+
+# Crear un objeto I2C
+i2c = busio.I2C(board.SCL, board.SDA)
+
+# Crear un objeto BMP280 utilizando la direcci�n I2C 0x76
+bmp280 = Adafruit_BMP280_I2C(i2c, address=0x76)
+
+# Configurar el modo de medici�n y otros par�metros si es necesario
+bmp280.sea_level_pressure = 1013.25  # Presi�n al nivel del mar en hPa
+
 try:
-    from smbus2 import SMBus  # Para Raspberry Pi 4, usar smbus2 es preferible
-except ImportError:
-    from smbus import SMBus  # Si smbus2 no está disponible, usar smbus
+    while True:
+        # Leer datos del BMP280
+        temperatura = bmp280.temperature
+        presion = bmp280.pressure
+        altitud = bmp280.altitude
 
-# Dirección del PCF8591 en el bus I2C
-PCF8591_ADDRESS = 0x76
+        # Imprimir los valores le�dos
+        print(f"Temperatura: {temperatura:.2f} C")
+        print(f"Presi�n: {presion:.2f} hPa")
+        print(f"Altitud: {altitud:.2f} m")
 
-# Inicializar el bus I2C
-bus = SMBus(1)
+        # Esperar un segundo antes de la pr�xima lectura
+        time.sleep(1)
 
-# Inicializar el BMP280
-bmp280 = BMP280(i2c_dev=bus)
-
-print("""temperature-and-pressure-with-adc.py - Displays the temperature, pressure, and analog input.
-
-Press Ctrl+C to exit!
-""")
-
-def read_adc(channel):
-    bus.write_byte(PCF8591_ADDRESS, (0x40 | channel))
-    bus.read_byte(PCF8591_ADDRESS)  # Dummy read to start conversion
-    return bus.read_byte(PCF8591_ADDRESS)
-
-while True:
-    try:
-        # Leer temperatura y presión del BMP280
-        temperature = bmp280.get_temperature()
-        pressure = bmp280.get_pressure()
-
-        # Leer valor ADC del PCF8591 (Canal 0)
-        adc_value = read_adc(0)
-
-        # Formatear la temperatura y la presión
-        format_temp = "{:.2f}".format(temperature)
-        format_press = "{:.2f}".format(pressure)
-
-        # Mostrar resultados
-        degree_sign = u"\N{DEGREE SIGN}"
-        print('Temperature = ' + format_temp + degree_sign + 'C')
-        print('Pressure = ' + format_press + ' hPa')
-        print(f'Analog Input (ADC Channel 0) = {adc_value}')
-
-        # Esperar antes de la próxima lectura
-        time.sleep(4)
-
-    except KeyboardInterrupt:
-        print("\nLectura finalizada por el usuario.")
-        break
-    except Exception as e:
-        print(f"Error: {e}")
+except KeyboardInterrupt:
+    print("Lectura detenida por el usuario")

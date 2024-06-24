@@ -3,16 +3,11 @@
 from flask      import Flask, request, jsonify
 from flask_cors import CORS
 
-# libreria para i2c
+import board
+import busio
+from adafruit_bmp280 import Adafruit_BMP280_I2C
 
-from bmn280     import BMN280
-
-#* Asumiendo que 'bmp280' es un módulo personalizado para BMP280
-try:
-#* # Para Raspberry Pi 4, usar smbus2 es preferible
-    from smbus2 import SMBus  
-except ImportError:
-    from smbus  import SMBus  
+import smbus2
 
 #* Los imports son las librerias que vamos a utilizar en nuestro servidor pero todas las funciones de ellas
 import sys
@@ -77,15 +72,11 @@ PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
 
 #Sensor de Presion Barometrica I2C
+i2c = busio.I2C(board.SCL, board.SDA)
+bmp280 = Adafruit_BMP280_I2C(i2c, address=0x76)
+bmp280.sea_level_pressure = 1013.25  # Presion al nivel del mar en hPa
 
-# Dirección del PCF8591 en el bus I2C
-PCF8591_ADDRESS_Barometro = 0x76
 
-# Inicializar el bus I2C
-bus_Barometro = SMBus(1)
-
-# Inicializar el BMP280
-bmp280 = BMP280(i2c_dev=bus)
 
 # ------------------------- FUNCIONES API ---------------------------
 
@@ -113,6 +104,7 @@ def On_Sensor():
         print("Sensor Calidad de aire encendido")
     elif sensor == '17':
         print("Sensor Presion Barometrica encendido")
+        On_Presure_Barometric()
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -141,6 +133,7 @@ def Off_Sensor():
         print("Sensor Calidad de aire apagado")
     elif sensor == '17':
         print("Sensor Presion Barometrica apagado")
+        Off_Presure_Barometric()
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -240,45 +233,29 @@ def Off_luminosidad():
     
 #* Funcion para encender el sensor Barometrico
 
-"""
+
 #* Funcion para apagar el sensor de luminosidad
-def Barometro_analogo(channel):
-    
-    global bus_Barometro
-    global PCF8591_ADDRESS_Barometro
-
-    
-    if channel < 0 or channel > 3:
-        return -1
-
-    bus_Barometro.write_byte(PCF8591_ADDRESS_Barometro, 0x40 | channel)
-    bus_Barometro.read_byte(PCF8591_ADDRESS_Barometro)  # leer una vez para iniciar la conversion
-    value = bus_Barometro.read_byte(PCF8591_ADDRESS_Barometro)
-    return value
 
 def On_Presure_Barometric():
     global sensor_barometrico
+    global datos
     sensor_barometrico = True
+    datos = []
+
     
     while sensor_barometrico:
-        temperatura = bmp280.get_temperature()
-        presion = bmp280.get_pressure()
-         # Leer valor ADC del PCF8591 (Canal 0)
-        adc_value = Barometro_analogo(0)
+        # Leer datos del BMP280
+        temperatura = bmp280.temperature
+        presion = bmp280.pressure
+        altitud = bmp280.altitude
 
-        # Formatear la temperatura y la presión
-        format_temp = "{:.2f}".format(temperature)
-        format_press = "{:.2f}".format(pressure)
+        # Imprimir los valores le�dos
+        print(f"Temperatura: {temperatura:.2f} C")
+        print(f"Presion: {presion:.2f} hPa")
+        print(f"Altitud: {altitud:.2f} m")
 
-        # Mostrar resultados
-        degree_sign = u"\N{DEGREE SIGN}"
-        print('Temperature = ' + format_temp + degree_sign + 'C')
-        print('Pressure = ' + format_press + ' hPa')
-        print(f'Analog Input (ADC Channel 0) = {adc_value}')
-
-        # Esperar antes de la próxima lectura
+        # Esperar un segundo antes de la pr�xima lectura
         time.sleep(10)
-        print(f'La temperatura es de: {temperatura}, la persion es de: {presion}')
 
 #* Funcion para apagar el sensor Barometrico   
 
@@ -286,10 +263,10 @@ def On_Presure_Barometric():
 def Off_Presure_Barometric():
     global sensor_barometrico
     sensor_barometrico = False
-    bus.close()
+    #bus.close()
 
 
-"""
+
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:
