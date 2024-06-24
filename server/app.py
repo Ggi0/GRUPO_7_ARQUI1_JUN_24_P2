@@ -33,7 +33,8 @@ datos = []
 #globales para sensor de calidad de aire
 
 sensor_aire = False
-
+valor_sensoraire = 0
+Switch_Sensoraire = False 
 
 #globales para sensor de temperatura
 sensor_temp = False
@@ -160,11 +161,71 @@ def Data_Sensor():
 # ------------------------- FUNCIONES ---------------------------
 
 #* Funcion para encender el sensor de calidad de aire
+@app.route('/api/EncenderCalidadAire', methods='POST')
 def On_aire():
-    pass
+    global sensor_aire
+    sensor_aire = True
+    global bus
+    global PCF8591_ADDRESS
 
+    data = request.json
+    data = data.get('CalidadAire')
+
+    if not isinstance(data, int):
+        return jsonify({"error": "Error en el parametro de calidad de aire..."}), 400
+
+    print("Leyendo datos de la calidad de aire de la zona...")
+    PCF8591_ADDRESS = 0x48
+    bus = smbus2.SMBus(1)
+
+    Datos_sensoraire()
+
+def leerADC(canal):
+    global bus
+    global PCF8591_ADDRESS
+    global valor_sensoraire
+
+    bus.write_byte(PCF8591_ADDRESS, canal)
+    valor_sensoraire = bus.read_byte(PCF8591_ADDRESS)
+    return valor_sensoraire
+
+
+def Clasificar_Calidad(aireVoltaje):
+    if aireVoltaje < 1.5:
+        return "Calidad de Aire Buena..."
+    else:
+        return "Calidad de Aire Mala..."
+
+def Datos_sensoraire():
+    global valor_sensoraire
+    global Switch_Sensoraire
+    Switch_Sensoraire = True
+
+    global datos    
+    datos = []
+
+    while Switch_Sensoraire:
+        Valor_adc = leerADC(0x40)
+        # El voltaje es el valor que se tomara para el arm
+        Voltage = Valor_adc / 255.0 * 3.3
+        print(f"Voltaje obtenido: {Voltage: .2f} V")
+        datos.append(Voltage)
+        # Clasifica la calidad del aire de la zona
+        sesgo = Clasificar_Calidad(Voltage)
+        print(sesgo)
+        time.sleep(10)
+    
+    print("Sensor de calidad de aire desactivado")
+    
+    return jsonify({"mensaje: ": "Calidad de Aire Deshabilitada"}), 200
+
+#Comando para apagar el aire
+@app.route('/api/ApagarCalidadAire', methods=['POST'])
 def Off_aire():
-    pass
+    global Switch_Sensoraire
+    Switch_Sensoraire = False
+
+    return jsonify({"mensaje: ": "Calidad de Aire Apagada"}), 200    
 
 #* Funcion para encender el sensor de Temperatura
 def On_Temperatura():
