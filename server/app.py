@@ -76,7 +76,7 @@ PIN_LUZ = 13           #GPIO 17
 #Sensor de Calidad de aire I2C y de Luminosidad I2C
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
-bus_sensoraire = smbus2.SMBus(0)
+bus_sensoraire = smbus2.SMBus(1)
 
 #Sensor de Presion Barometrica I2C
 
@@ -87,7 +87,7 @@ PCF8591_ADDRESS_Barometro = 0x76
 bus_Barometro = SMBus(1)
 
 # Inicializar el BMP280
-bmp280 = BMP280(i2c_dev=bus)
+bmp280 = BMP280(i2c_dev=bus_Barometro)
 
 # ------------------------- FUNCIONES API ---------------------------
 
