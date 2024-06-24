@@ -161,18 +161,11 @@ def Data_Sensor():
 # ------------------------- FUNCIONES ---------------------------
 
 #* Funcion para encender el sensor de calidad de aire
-@app.route('/api/EncenderCalidadAire', methods='POST')
 def On_aire():
     global sensor_aire
     sensor_aire = True
     global bus
     global PCF8591_ADDRESS
-
-    data = request.json
-    data = data.get('CalidadAire')
-
-    if not isinstance(data, int):
-        return jsonify({"error": "Error en el parametro de calidad de aire..."}), 400
 
     print("Leyendo datos de la calidad de aire de la zona...")
     PCF8591_ADDRESS = 0x48
@@ -214,18 +207,15 @@ def Datos_sensoraire():
         sesgo = Clasificar_Calidad(Voltage)
         print(sesgo)
         time.sleep(10)
-    
+        
     print("Sensor de calidad de aire desactivado")
     
-    return jsonify({"mensaje: ": "Calidad de Aire Deshabilitada"}), 200
-
 #Comando para apagar el aire
-@app.route('/api/ApagarCalidadAire', methods=['POST'])
 def Off_aire():
     global Switch_Sensoraire
+    global bus
     Switch_Sensoraire = False
-
-    return jsonify({"mensaje: ": "Calidad de Aire Apagada"}), 200    
+    bus.close()
 
 #* Funcion para encender el sensor de Temperatura
 def On_Temperatura():
