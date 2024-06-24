@@ -76,6 +76,7 @@ PIN_LUZ = 13           #GPIO 17
 #Sensor de Calidad de aire I2C y de Luminosidad I2C
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
+bus_sensoraire = ""
 
 #Sensor de Presion Barometrica I2C
 
@@ -164,22 +165,23 @@ def Data_Sensor():
 def On_aire():
     global sensor_aire
     sensor_aire = True
-    global bus
+    global bus_sensoraire
     global PCF8591_ADDRESS
 
+    print("Sensor de aire encendido...")
     print("Leyendo datos de la calidad de aire de la zona...")
     PCF8591_ADDRESS = 0x48
-    bus = smbus2.SMBus(1)
+    bus_sensoraire = smbus2.SMBus(1)
 
     Datos_sensoraire()
 
 def leerADC(canal):
-    global bus
+    global bus_sensoraire
     global PCF8591_ADDRESS
     global valor_sensoraire
 
-    bus.write_byte(PCF8591_ADDRESS, canal)
-    valor_sensoraire = bus.read_byte(PCF8591_ADDRESS)
+    bus_sensoraire.write_byte(PCF8591_ADDRESS, canal)
+    valor_sensoraire = bus_sensoraire.read_byte(PCF8591_ADDRESS)
     return valor_sensoraire
 
 
@@ -208,14 +210,16 @@ def Datos_sensoraire():
         print(sesgo)
         time.sleep(10)
         
-    print("Sensor de calidad de aire desactivado")
+    print("Sensor de calidad de aire desactivado...")
     
 #Comando para apagar el aire
 def Off_aire():
     global Switch_Sensoraire
-    global bus
+    global bus_sensoraire
     Switch_Sensoraire = False
-    bus.close()
+    bus_sensoraire.close()
+
+    print("Sensor de calidad de aire apagado...")
 
 #* Funcion para encender el sensor de Temperatura
 def On_Temperatura():
