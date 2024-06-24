@@ -29,27 +29,31 @@ app = Flask(__name__)
 #* creamos una instancia de la clase CORS
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
+# ------------------------ DATOS LEIDOS --------------------------
+datos = []
+
+
 # ----------------------------VARIABLES ----------------------
 
 
 #globales para sensor de calidad de aire
-direccion_sensoraire = ""
-bus_sensoraire = ""
-valor_sensoraire = 0
-Switch_Sensoraire = False 
+
+sensor_aire = False
 
 
 #globales para sensor de temperatura
+sensor_temp = False
 
 
 #globales para sensor de humedad
+sensor_humedad = False
 
 
 #globales para luminosidad
 sensor_luminosidad = False
 
 #globales para sensor de viento
-
+sensor_viento = False
 
 #globales para sensor barometrico
 sensor_barometrico = False
@@ -154,14 +158,39 @@ def Data_Sensor():
 # ------------------------- FUNCIONES ---------------------------
 
 #* Funcion para encender el sensor de calidad de aire
+def On_aire():
+    pass
+
+def Off_aire():
+    pass
+
+#* Funcion para encender el sensor de Temperatura
+def On_Temperatura():
+    pass
+
+def Off_Temperatura():
+    pass
+
+#* Funcion para encender el sensor de Humedad
+def On_Humedad():
+    pass
+
+def Off_Humedad():
+    pass
+
+#* Funcion para encender el sensor de Humedad
+def On_Viento():
+    pass
+
+def Off_Viento():
+    pass
 
 #* Funcion para apagar el sensor de luminosidad
 def luminosidad_analogo(channel):
-    global sensor_luminosidad
+    
     global bus
     global PCF8591_ADDRESS
-    
-    sensor_luminosidad = True
+
     
     if channel < 0 or channel > 3:
         return -1
@@ -173,10 +202,16 @@ def luminosidad_analogo(channel):
 
 
 def On_luminosidad():
+    global sensor_luminosidad
+    sensor_luminosidad = True
+    global datos    
+    datos = []
+
     while sensor_luminosidad:
         analog_value = luminosidad_analogo(1)  # Leer desde el canal AO1
         print("Valor analogico leido desde AO1: ", analog_value)
         
+        """
         # Interpretaciï¿½n de los valores
         if analog_value > 200:
             print("Muy oscuro")
@@ -189,7 +224,10 @@ def On_luminosidad():
         else:
             print("Muy iluminado")
         
-        time.sleep(1)
+        """
+        
+        
+        time.sleep(10)
         
         
 def Off_luminosidad():
@@ -200,7 +238,7 @@ def Off_luminosidad():
     
 #* Funcion para encender el sensor Barometrico
 
-'''
+"""
 def On_Presure_Barometric():
     global sensor_barometrico
     sensor_barometrico = True
@@ -214,19 +252,18 @@ def On_Presure_Barometric():
         time.sleep(10)
         print(f'La temperatura es de: {temperatura}, la persion es de: {presion}')
 
-
-'''
-
-
 #* Funcion para apagar el sensor Barometrico   
 
-'''
+
 def Off_Presure_Barometric():
     global sensor_barometrico
     sensor_barometrico = False
     bus.close()
 
-'''
+
+"""
+
+
 
 
 #* El try es para manejar los errores que se puedan presentar en el servidor

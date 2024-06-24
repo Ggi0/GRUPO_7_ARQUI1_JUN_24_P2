@@ -6,7 +6,7 @@ except ImportError:
     from smbus import SMBus  # Si smbus2 no está disponible, usar smbus
 
 # Dirección del PCF8591 en el bus I2C
-PCF8591_ADDRESS = 0x48
+PCF8591_ADDRESS = 0x76
 
 # Inicializar el bus I2C
 bus = SMBus(1)
