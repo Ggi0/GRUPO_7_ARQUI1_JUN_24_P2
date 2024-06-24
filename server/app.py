@@ -76,7 +76,7 @@ PIN_LUZ = 13           #GPIO 17
 #Sensor de Calidad de aire I2C y de Luminosidad I2C
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
-bus_sensoraire = ""
+bus_sensoraire = smbus2.SMBus(0)
 
 #Sensor de Presion Barometrica I2C
 
@@ -113,6 +113,7 @@ def On_Sensor():
         On_luminosidad()
     elif sensor == '16':
         print("Sensor Calidad de aire encendido")
+        On_aire()
     elif sensor == '17':
         print("Sensor Presion Barometrica encendido")
     else:
@@ -141,6 +142,7 @@ def Off_Sensor():
         Off_luminosidad()
     elif sensor == '16':
         print("Sensor Calidad de aire apagado")
+        Off_aire()
     elif sensor == '17':
         print("Sensor Presion Barometrica apagado")
     else:
@@ -165,14 +167,8 @@ def Data_Sensor():
 def On_aire():
     global sensor_aire
     sensor_aire = True
-    global bus_sensoraire
-    global PCF8591_ADDRESS
 
-    print("Sensor de aire encendido...")
     print("Leyendo datos de la calidad de aire de la zona...")
-    PCF8591_ADDRESS = 0x48
-    bus_sensoraire = smbus2.SMBus(1)
-
     Datos_sensoraire()
 
 def leerADC(canal):
