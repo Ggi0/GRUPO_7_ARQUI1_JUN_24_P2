@@ -231,7 +231,8 @@ def On_luminosidad():
         
         time.sleep(10)
         
-        
+    #Comentario ahi random
+
 def Off_luminosidad():
     global sensor_luminosidad
     global bus
