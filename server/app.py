@@ -2,14 +2,8 @@
 #* Los from son las librerias que vamos a utilizar en nuestro servidor pero solo algunas funciones de ellas
 from flask      import Flask, request, jsonify
 from flask_cors import CORS
-#import RPi.GPIO as GPIO
-import sys
-import time
-import threading
+
 # libreria para i2c
-import smbus2
-
-
 """
 from bmn280     import BMN280
 
@@ -81,9 +75,17 @@ PIN_LUZ = 13           #GPIO 17
 #Sensor de Calidad de aire I2C y de Luminosidad I2C
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
+
 #Sensor de Presion Barometrica I2C
 
+# Dirección del PCF8591 en el bus I2C
+PCF8591_ADDRESS_Barometro = 0x76
 
+# Inicializar el bus I2C
+bus_Barometro = SMBus(1)
+
+# Inicializar el BMP280
+bmp280 = BMP280(i2c_dev=bus)
 
 # ------------------------- FUNCIONES API ---------------------------
 
@@ -186,7 +188,7 @@ def Off_Viento():
     pass
 
 #* Funcion para apagar el sensor de luminosidad
-def luminosidad_analogo(channel):
+def Luminosidad_analogo(channel):
     
     global bus
     global PCF8591_ADDRESS
@@ -239,16 +241,42 @@ def Off_luminosidad():
 #* Funcion para encender el sensor Barometrico
 
 """
+#* Funcion para apagar el sensor de luminosidad
+def Barometro_analogo(channel):
+    
+    global bus_Barometro
+    global PCF8591_ADDRESS_Barometro
+
+    
+    if channel < 0 or channel > 3:
+        return -1
+
+    bus_Barometro.write_byte(PCF8591_ADDRESS_Barometro, 0x40 | channel)
+    bus_Barometro.read_byte(PCF8591_ADDRESS_Barometro)  # leer una vez para iniciar la conversion
+    value = bus_Barometro.read_byte(PCF8591_ADDRESS_Barometro)
+    return value
+
 def On_Presure_Barometric():
     global sensor_barometrico
     sensor_barometrico = True
     
-    bus = SMBus(1)
-    bmp280 = BMP280(i2c_dev=bus)
-    
     while sensor_barometrico:
         temperatura = bmp280.get_temperature()
         presion = bmp280.get_pressure()
+         # Leer valor ADC del PCF8591 (Canal 0)
+        adc_value = Barometro_analogo(0)
+
+        # Formatear la temperatura y la presión
+        format_temp = "{:.2f}".format(temperature)
+        format_press = "{:.2f}".format(pressure)
+
+        # Mostrar resultados
+        degree_sign = u"\N{DEGREE SIGN}"
+        print('Temperature = ' + format_temp + degree_sign + 'C')
+        print('Pressure = ' + format_press + ' hPa')
+        print(f'Analog Input (ADC Channel 0) = {adc_value}')
+
+        # Esperar antes de la próxima lectura
         time.sleep(10)
         print(f'La temperatura es de: {temperatura}, la persion es de: {presion}')
 
@@ -262,9 +290,6 @@ def Off_Presure_Barometric():
 
 
 """
-
-
-
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:
