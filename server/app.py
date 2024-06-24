@@ -4,7 +4,7 @@ from flask      import Flask, request, jsonify
 from flask_cors import CORS
 
 # libreria para i2c
-"""
+
 from bmn280     import BMN280
 
 #* Asumiendo que 'bmp280' es un módulo personalizado para BMP280
@@ -13,7 +13,7 @@ try:
     from smbus2 import SMBus  
 except ImportError:
     from smbus  import SMBus  
-"""
+
 #* Los imports son las librerias que vamos a utilizar en nuestro servidor pero todas las funciones de ellas
 import sys
 import time
