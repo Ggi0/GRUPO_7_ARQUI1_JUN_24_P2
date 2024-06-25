@@ -21,12 +21,13 @@ suma_loop:
 
 media:
     // Dividimos el valor total por la cantidad de elementos
+    mov  x1, x3
     mov  x4, x3
     fdiv d0, d2, x3
 
 total_loop:
     // Si x1 (la longitud del arreglo) es 0, hemos terminado
-    cbz x4, divide
+    cbz x1, divide
 
     // Sumar el valor actual del arreglo a x2
     ldr s4, [x0], #4
@@ -40,7 +41,7 @@ total_loop:
     // suma los valores de potencia
     fadd d6, d6, d5 
     // Decrementar x1 y continuar con el siguiente elemento
-    sub x4, x4, #1
+    sub x1, x1, #1
     // Incrementa el contador de valores
     add x5, x5, #1
     b total_loop
