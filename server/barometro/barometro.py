@@ -13,6 +13,7 @@ c_array = (ctypes.c_int * len(py_array))(*py_array)
 def main():
     
     # Declarar los tipos de retorno y argumentos de las funciones ensamblador
+    lib.sum_array.restype = ctypes.c_float
     result = lib.sum_array(c_array, len(py_array))
     print(f"Resultado de la suma: {result}")
 
