@@ -5,7 +5,7 @@ import os
 lib = ctypes.CDLL(os.path.abspath("barometro.so"))
 
 # Crear un arreglo en Python
-py_array = [6,2,3,1]
+py_array = [6,2,3,2]
 
 # Convertir el arreglo de Python a un arreglo de C
 c_array = (ctypes.c_int * len(py_array))(*py_array)
