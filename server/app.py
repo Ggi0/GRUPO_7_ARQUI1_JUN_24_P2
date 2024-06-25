@@ -9,6 +9,9 @@ from adafruit_bmp280 import Adafruit_BMP280_I2C
 
 import smbus2
 
+import ctypes
+import os
+
 #* Los imports son las librerias que vamos a utilizar en nuestro servidor pero todas las funciones de ellas
 import sys
 import time
@@ -18,9 +21,14 @@ app = Flask(__name__)
 #* creamos una instancia de la clase CORS
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
-# ------------------------ DATOS LEIDOS --------------------------
-datos = []
 
+#------------------------- BLIBLIOTECA COMPARTIDA ---------------------------
+lib = ctypes.CDLL(os.path.abspath("calculos.so"))
+
+
+# ------------------------ DATOS --------------------------
+datos = []
+resultados = []
 
 # ----------------------------VARIABLES ----------------------
 
@@ -28,6 +36,9 @@ datos = []
 #globales para sensor de calidad de aire
 
 sensor_aire = False
+valor_sensoraire = 0
+Switch_Sensoraire = False 
+
 
 
 #globales para sensor de temperatura
@@ -70,6 +81,7 @@ PIN_LUZ = 13           #GPIO 17
 #Sensor de Calidad de aire I2C y de Luminosidad I2C
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
+bus_sensoraire = smbus2.SMBus(1)
 
 
 #Sensor de Presion Barometrica I2C
@@ -103,6 +115,7 @@ def On_Sensor():
         On_luminosidad()
     elif sensor == '16':
         print("Sensor Calidad de aire encendido")
+        On_aire()
     elif sensor == '17':
         print("Sensor Presion Barometrica encendido")
         On_Presure_Barometric()
@@ -132,6 +145,7 @@ def Off_Sensor():
         Off_luminosidad()
     elif sensor == '16':
         print("Sensor Calidad de aire apagado")
+        Off_aire()
     elif sensor == '17':
         print("Sensor Presion Barometrica apagado")
         Off_Presure_Barometric()
@@ -155,10 +169,58 @@ def Data_Sensor():
 
 #* Funcion para encender el sensor de calidad de aire
 def On_aire():
-    pass
+    global sensor_aire
+    sensor_aire = True
+
+    print("Leyendo datos de la calidad de aire de la zona...")
+    Datos_sensoraire()
+
+def leerADC(canal):
+    global bus_sensoraire
+    global PCF8591_ADDRESS
+    global valor_sensoraire
+
+    bus_sensoraire.write_byte(PCF8591_ADDRESS, canal)
+    valor_sensoraire = bus_sensoraire.read_byte(PCF8591_ADDRESS)
+    return valor_sensoraire
+
+
+def Clasificar_Calidad(aireVoltaje):
+    if aireVoltaje < 1.5:
+        return "Calidad de Aire Buena..."
+    else:
+        return "Calidad de Aire Mala..."
+
+def Datos_sensoraire():
+    global valor_sensoraire
+    global Switch_Sensoraire
+    Switch_Sensoraire = True
+
+    global datos    
+    datos = []
+
+    while Switch_Sensoraire:
+        Valor_adc = leerADC(0x40)
+        # El voltaje es el valor que se tomara para el arm
+        Voltage = Valor_adc / 255.0 * 3.3
+        print(f"Voltaje obtenido: {Voltage: .2f} V")
+        datos.append(Voltage)
+        # Clasifica la calidad del aire de la zona
+        sesgo = Clasificar_Calidad(Voltage)
+        print(sesgo)
+        time.sleep(10)
+        
+    print("Sensor de calidad de aire desactivado...")
+    
 
 def Off_aire():
-    pass
+    global Switch_Sensoraire
+    global bus_sensoraire
+    Switch_Sensoraire = False
+    bus_sensoraire.close()
+
+    print("Sensor de calidad de aire apagado...")
+
 
 #* Funcion para encender el sensor de Temperatura
 def On_Temperatura():
@@ -269,6 +331,22 @@ def Off_Presure_Barometric():
     sensor_barometrico = False
     #bus.close()
 
+#------------------------- CALCULOS ASM  ---------------------------
+
+def calculos_estadisticos():
+    global datos 
+    global lib
+    global resultados
+    
+    resultados = []
+    
+    c_array = (ctypes.c_int * len(datos))(*datos)
+    
+    result_suma = lib.sum_array(c_array, len(datos))
+    print(f"La suma de los valores es: {result_suma}")
+    resultados.append(result_suma)
+    
+    
 
 
 
