@@ -13,7 +13,7 @@ sum_array:
 
         // Sumar el valor actual del arreglo a x2
         ldr w3, [x0], #4
-        add x2, x2, w3
+        add x2, x2, w3, uxtw
 
         // Decrementar x1 y continuar con el siguiente elemento
         sub x1, x1, #1
