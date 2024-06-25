@@ -201,7 +201,7 @@ def On_luminosidad():
     global sensor_luminosidad
     sensor_luminosidad = True
     global datos    
-    datos = []
+    datos.clear()
 
     while sensor_luminosidad:
         analog_value = Luminosidad_analogo(1)  # Leer desde el canal AO1
@@ -241,7 +241,7 @@ def On_Presure_Barometric():
     global sensor_barometrico
     global datos
     sensor_barometrico = True
-    datos = []
+    datos.clear()
 
     
     while sensor_barometrico:
@@ -254,6 +254,9 @@ def On_Presure_Barometric():
         print(f"Temperatura: {temperatura:.2f} C")
         print(f"Presion: {presion:.2f} hPa")
         print(f"Altitud: {altitud:.2f} m")
+        
+        # Agrega el valor de la presion a la lista
+        datos.append(presion)
 
         # Esperar un segundo antes de la pr�xima lectura
         time.sleep(10)
