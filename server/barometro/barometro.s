@@ -10,8 +10,8 @@ suma_loop:
     cbz x1, media
 
     // Sumar el valor actual del arreglo a x2
-    ldr w3, [x0], #4
-    add d2, d2, w3 uxtw
+    ldr s3, [x0], #4
+    fadd d2, d2, s3
 
     // Decrementar x1 y continuar con el siguiente elemento
     sub x1, x1, #1
@@ -22,7 +22,7 @@ suma_loop:
 media:
     // Dividimos el valor total por la cantidad de elementos
     mov  x1, x3
-    div d0, d2, x3
+    fdiv d0, d2, x4
 
     // Mover el resultado (la suma) a x0 para devolverlo
     mov x0, d0
