@@ -1,4 +1,4 @@
-.section .global sum_array
+.global sum_array
 
 .section .text
 sum_array:
