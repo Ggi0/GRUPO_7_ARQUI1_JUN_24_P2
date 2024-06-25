@@ -2,7 +2,7 @@
 sum_array:
     // Los primeros dos argumentos (el arreglo y su longitud) se pasan en los registros x0 y x1
     // Inicializar x2 (que usaremos para la suma) a 0
-    mov x2, #0
+    fmov d2, #0.0
 
 // Crear un bucle que recorra el arreglo
 suma_loop:
@@ -11,7 +11,8 @@ suma_loop:
 
     // Sumar el valor actual del arreglo a x2
     ldr s3, [x0], #4
-    fadd d2, d2, s3
+    scvtf d3, s3
+    fadd d2, d2, d3
 
     // Decrementar x1 y continuar con el siguiente elemento
     sub x1, x1, #1
@@ -21,9 +22,10 @@ suma_loop:
 
 media:
     // Dividimos el valor total por la cantidad de elementos
-    mov  x1, x3
-    fdiv d0, d2, x4
+    mov  x4, x3
+    scvtf d4, x4
+    fdiv d0, d2, d4
 
     // Mover el resultado (la suma) a x0 para devolverlo
-    mov x0, d0
+    fmov x0, d0
     ret
