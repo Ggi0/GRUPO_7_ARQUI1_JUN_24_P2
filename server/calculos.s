@@ -1,21 +1,27 @@
-.global sum_three
-.global subtract_three
-.global multiply_three
+.global sum_array
 
-// Funcion de suma de tres numeros
-sum_three:
-    ADD x0, x0, x1  // Sumar el contenido de x0 y x1, y almacenar el resultado en x0
-    ADD x0, x0, x2  // Sumar el contenido de x0 y x2, y almacenar el resultado en x0
-    RET             // Retornar al llamador
+.section .text
 
-// Funcion de resta de tres numeros
-subtract_three:
-    SUB x0, x0, x1  // Restar x1 de x0, y almacenar el resultado en x0
-    SUB x0, x0, x2  // Restar x2 de x0, y almacenar el resultado en x0
-    RET             // Retornar al llamador
+//SUMA  DE UN ARREGLO DE ENTEROS
+sum_array:
+    // Los primeros dos argumentos (el arreglo y su longitud) se pasan en los registros x0 y x1
+    // Inicializar x2 (que usaremos para la suma) a 0
+    mov x2, #0
 
-// Funcion de multiplicacion de tres numeros
-multiply_three:
-    MUL x0, x0, x1  // Multiplicar el contenido de x0 y x1, y almacenar el resultado en x0
-    MUL x0, x0, x2  // Multiplicar el contenido de x0 y x2, y almacenar el resultado en x0
-    RET             // Retornar al llamador
+    // Crear un bucle que recorra el arreglo
+    loop:
+        // Si x1 (la longitud del arreglo) es 0, hemos terminado
+        cbz x1, done
+
+        // Sumar el valor actual del arreglo a x2
+        ldr w3, [x0], #4
+        add x2, x2, w3, uxtw
+
+        // Decrementar x1 y continuar con el siguiente elemento
+        sub x1, x1, #1
+        b loop
+
+    done:
+    // Mover el resultado (la suma) a x0 para devolverlo
+    mov x0, x2
+    ret
