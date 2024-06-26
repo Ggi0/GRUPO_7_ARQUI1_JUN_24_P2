@@ -162,7 +162,16 @@ def Estadistics_Sensor():
 #* Funcion para obtener los datos del sensor seleccionado
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
-    pass
+    # Aquí es donde obtendrías los datos del sensor en la vida real
+    data = {
+        "Promedio": datos[0],
+        "Mediana": datos[1],
+        "Desviación Estandar": datos[2],
+        "Máximo": datos[3],
+        "Mínimo": datos[4],
+        "Moda": datos[5]
+    }
+    return jsonify(data)
 
 
 # ------------------------- FUNCIONES ---------------------------

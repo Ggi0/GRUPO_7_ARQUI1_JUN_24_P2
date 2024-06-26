@@ -40,6 +40,27 @@ function App() {
       });
   };
 
+  // ----------------- Codigo de la Tabla ----------------
+  const [calData, setData] = useState({
+    "Promedio": 0,
+    "Mediana": 0,
+    "DesEstandar": 0,
+    "Max": 0,
+    "Min": 0,
+    "Moda": 0
+  });
+
+  const fetchDataClick = (url) => {
+    axios.get(url)
+        .then(response => {
+            setData(response.data);
+        })
+        .catch(error => {
+          console.error('Hubo un error!', error);
+          // Manejar el error aquí, como mostrar un mensaje de error
+        });  
+  };
+
   // ----------------- Graphic Interface -----------------
   const chartData = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June'],
@@ -177,7 +198,7 @@ function App() {
                     background: 'rgb(22,118,187)',
                     width: '94px',
                   }}
-                  onClick={() => handleButtonClick('http://127.0.0.1:8000/api/data')}
+                  onClick={() => fetchDataClick('http://127.0.0.1:8000/api/data')}
                 >
                   Calcular
                 </button>
@@ -212,12 +233,12 @@ function App() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Cell 1</td>
-                      <td>Cell 1</td>
-                      <td>Cell 2</td>
-                      <td>Cell 2</td>
-                      <td>Cell 2</td>
-                      <td>Cell 2</td>
+                      <td>{calData.Promedio}</td>
+                      <td>{calData.Mediana}</td>
+                      <td>{calData.DesEstandar}</td>
+                      <td>{calData.Max}</td>
+                      <td>{calData.Min}</td>
+                      <td>{calData.Moda}</td>
                     </tr>
                     <tr></tr>
                   </tbody>
