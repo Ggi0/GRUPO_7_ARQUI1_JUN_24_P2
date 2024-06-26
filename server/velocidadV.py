@@ -9,6 +9,8 @@ contador_pulsos = 0
 DISTANCIA_POR_PULSO = 0.1  # Ejemplo: 0.1 metros entre cada interrupción
 TIEMPO_MEDICION = 1  # 1 segundo
 
+print("hola")
+
 def setup():
     """
     Configura los pines GPIO y la interrupción.
