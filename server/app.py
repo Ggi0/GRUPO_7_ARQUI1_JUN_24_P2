@@ -7,6 +7,9 @@ import board
 import busio
 from adafruit_bmp280 import Adafruit_BMP280_I2C
 
+# Libreria para temp y humedad Yair
+import Adafruit_DHT
+
 import smbus2
 
 import ctypes
@@ -40,7 +43,7 @@ valor_sensoraire = 0
 Switch_Sensoraire = False 
 
 
-
+# ----- Para Funciones Yair  -------
 #globales para sensor de temperatura
 sensor_temp = False
 
@@ -67,8 +70,10 @@ sensor_barometrico = False
 #Sensor de calidad de aire digital
 PIN_AIRE = 11          #GPIO 17
 
-#Sensor Temperatura y humedad
-PIN_TEMP = 17          #GPIO 4
+#Sensor Temperatura y humedad - YAIR
+# Configuración del sensor
+DHT_SENSOR = Adafruit_DHT.DHT11
+PIN_TEMP = 7          #GPIO 4
 
 #Sensor de velocidad viento
 PIN_VIENTO = 22        #GPIO 25
@@ -102,12 +107,15 @@ def On_Sensor():
     
     if sensor is None:
         return jsonify({'error': 'sensor and action are required'}), 400
-    
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
-        print("Sensor Temperatura encendido")  
+        print("Sensor 9Temperatura encendido")  
+        On_Temperatura()
+        
     elif sensor == '13':
         print("Sensor Humedad encendido")
+        On_Humedad()
+        
     elif sensor == '14':
         print("Sensor Velocidad viento encendido")
     elif sensor == '15':
@@ -136,8 +144,12 @@ def Off_Sensor():
     #* Aqui se debe de agregar la logica para apagar el sensor
     if   sensor == '12':
         print("Sensor Temperatura apagado")  
+        Off_Temperatura()
+        
     elif sensor == '13':
         print("Sensor Humedad apagado")
+        Off_Humedad()
+        
     elif sensor == '14':
         print("Sensor Velocidad viento apagado")
     elif sensor == '15':
@@ -245,19 +257,55 @@ def Off_aire():
 
 #* Funcion para encender el sensor de Temperatura
 def On_Temperatura():
-    pass
+    global sensor_temp
+    sensor_temp = True
+    
+    print("Leyendo datos de la Temperatura de la zona")
+    read_temperature()
+
+# Funcion para leer los datos de la temperatura.
+def read_temperature():
+    # Intentar leer la temperatura desde el sensor
+    humidity, temperature = Adafruit_DHT.read(DHT_SENSOR, PIN_TEMP)
+    
+    if temperature is not None:
+        print(f"Temperatura: {temperature:.2f}°C")
+        return temperature
+    else:
+        print("Error al leer el sensor DHT11")
+        return None
 
 def Off_Temperatura():
-    pass
+    global sensor_temp
+    sensor_temp = False
+    print("sensor temperatura apagado...")
 
 #* Funcion para encender el sensor de Humedad
 def On_Humedad():
-    pass
+    global sensor_humedad
+    sensor_humedad = True
+    
+    print("Leyendo datos de Humedad de la zona")
+    read_humidity()
+
+# funcion para leer datos de la humedad
+def read_humidity():
+    # Intentar leer la humedad desde el sensor
+    humidity, temperature = Adafruit_DHT.read(DHT_SENSOR, PIN_TEMP)
+    
+    if humidity is not None:
+        print(f"Humedad: {humidity:.2f}%")
+        return humidity
+    else:
+        print("Error al leer el sensor DHT11")
+        return None
 
 def Off_Humedad():
-    pass
+    global sensor_humedad
+    sensor_humedad = False
+    print("sensor humedad apagado...")
 
-#* Funcion para encender el sensor de Humedad
+#* Funcion para encender el sensor de VIENTO
 def On_Viento():
     pass
 
