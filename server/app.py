@@ -157,7 +157,19 @@ def Off_Sensor():
 #* Funcion para obtener las estadisticas del sensor seleccionado
 @app.route('/api/stats', methods=['GET'])
 def Estadistics_Sensor():
-    pass
+    # Aquí es donde obtendrías los datos del sensor en la vida real
+    data = {
+        "labels": ['Promedio', 'Mediana', 'DesviacionEstandar', 'Máximo', 'Mínimo', 'Moda'],
+        "datasets": [
+            {
+                "label": 'Revenue',
+                "backgroundColor": '#4e73df',
+                "borderColor": '#4e73df',
+                "data": [datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]],
+            },
+        ],
+    }
+    return jsonify(data)
 
 #* Funcion para obtener los datos del sensor seleccionado
 @app.route('/api/data', methods=['GET'])

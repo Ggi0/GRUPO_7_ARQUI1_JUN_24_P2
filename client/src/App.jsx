@@ -62,16 +62,20 @@ function App() {
   };
 
   // ----------------- Graphic Interface -----------------
-  const chartData = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-    datasets: [
-      {
-        label: 'Revenue',
-        backgroundColor: '#4e73df',
-        borderColor: '#4e73df',
-        data: [4500, 5300, 6250, 7800, 9800, 15000],
-      },
-    ],
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+
+  const fetchDataGraf = (url) => {
+    axios.get(url)
+        .then(response => {
+            setChartData(response.data);
+        })
+        .catch(error => {
+          console.error('Hubo un error!', error);
+          // Manejar el error aquí, como mostrar un mensaje de error
+        });  
   };
 
   const chartOptions = {
@@ -212,7 +216,7 @@ function App() {
                     marginLeft: '5px',
                     width: '94px',
                   }}
-                  onClick={() => handleButtonClick('http://127.0.0.1:8000/api/stats')}
+                  onClick={() => fetchDataGraf('http://127.0.0.1:8000/api/stats')}
                 >
                   Graficar
                 </button>
