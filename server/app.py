@@ -166,7 +166,7 @@ def Data_Sensor():
     data = {
         "Promedio": datos[0],
         "Mediana": datos[1],
-        "Desviación Estandar": datos[2],
+        "DesviacionEstandar": datos[2],
         "Máximo": datos[3],
         "Mínimo": datos[4],
         "Moda": datos[5]
