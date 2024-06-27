@@ -13,7 +13,7 @@ import Adafruit_DHT
 import smbus2
 
 import ctypes
-import os
+#import os
 
 #* Los imports son las librerias que vamos a utilizar en nuestro servidor pero todas las funciones de ellas
 import sys
@@ -26,7 +26,7 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=T
 
 
 #------------------------- BLIBLIOTECA COMPARTIDA ---------------------------
-lib = ctypes.CDLL(os.path.abspath("calculos.so"))
+#lib = ctypes.CDLL(os.path.abspath("calculos.so"))
 
 
 # ------------------------ DATOS --------------------------
