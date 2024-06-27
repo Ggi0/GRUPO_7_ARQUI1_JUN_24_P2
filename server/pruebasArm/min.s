@@ -1,40 +1,23 @@
 .global findMin
 
-.section .text
-
-// Encuentra el valor mínimo en un arreglo de enteros
 findMin:
-    // Argumentos:
-    // x0 - dirección del arreglo
-    // x1 - longitud del arreglo
+        // x0 contiene la direcci�n del arreglo
+        // x1 contiene el tama�o del arreglo
+    ldr w2, [x0]  // Carga el primer elemento como m�nimo inicial
+    mov x3, #1    // Inicializa el contador en 1
 
-    // Si la longitud del arreglo es 0, devolver 0
-    cbz x1, done
-
-    // Inicializar x2 con el primer valor del arreglo (valor mínimo inicial)
-    ldr w2, [x0]
-
-    // Ajustar x0 para que apunte al segundo elemento
-    add x0, x0, #4
-    sub x1, x1, #1
-
-    // Crear un bucle que recorra el arreglo
     loop:
-        // Si x1 (la longitud restante del arreglo) es 0, hemos terminado
-        cbz x1, done
+        cmp x3, x1    // Compara el contador con el tama�o del arreglo
+        b.ge end      // Si es mayor o igual, termina el loop
+        ldr w4, [x0, x3, lsl #2]  // Carga el siguiente elemento
+        cmp w4, w2    // Compara con el m�nimo actual
+        b.ge next     // Si es mayor o igual, pasa al siguiente
+        mov w2, w4    // Si es menor, actualiza el m�nimo
 
-        // Cargar el valor actual del arreglo en w3
-        ldr w3, [x0], #4
+    next:
+        add x3, x3, #1  // Incrementa el contador
+        b loop          // Vuelve al inicio del loop
 
-        // Comparar el valor actual con el mínimo encontrado hasta ahora
-        cmp w3, w2
-        csel w2, w2, w3, lo  // w2 = (w2 < w3) ? w2 : w3
-
-        // Decrementar x1 y continuar con el siguiente elemento
-        sub x1, x1, #1
-        b loop
-
-    done:
-    // Mover el resultado (el mínimo) a x0 para devolverlo
-    mov x0, w2
-    ret
+    end:
+        mov x0, x2    // Mueve el resultado a x0 para devolverlo
+        ret           // Retorna
