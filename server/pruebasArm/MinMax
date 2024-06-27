@@ -1,0 +1,72 @@
+.section .data
+input_fmt:   .asciz "%d"
+output_fmt:  .asciz "El valor máximo es: %d\nEl valor mínimo es: %d\n"
+num_count:   .word 10
+numbers:     .space 40
+
+.section .bss
+
+.section .text
+.global _start
+
+_start:
+    mov x19, #0              // x19 será nuestro índice del array
+    mov x20, #10             // x20 será el contador de números
+    ldr x21, =numbers        // x21 apunta al inicio del array de números
+
+read_numbers:
+    cmp x19, x20
+    bge find_max_min         // Si ya leímos 10 números, salta a encontrar el máximo y mínimo
+
+    // Leer número desde la consola
+    ldr x0, =input_fmt
+    add x1, x21, x19, lsl #2 // Calcular dirección de almacenamiento en el array
+    mov x2, #0               // Espacio reservado para scanf
+    bl scanf
+
+    add x19, x19, #1         // Incrementar el índice
+    b read_numbers           // Leer siguiente número
+
+find_max_min:
+    ldr x19, =numbers        // x19 apunta al inicio del array de números
+    ldr w22, [x19]           // Cargar el primer número en w22 (máximo inicial)
+    ldr w23, [x19]           // Cargar el primer número en w23 (mínimo inicial)
+    add x19, x19, #4         // Mover a la siguiente posición del array
+    mov x20, #1              // Inicializar contador a 1
+
+compare_numbers:
+    cmp x20, #10
+    bge print_result         // Si ya comparamos todos los números, salta a imprimir el resultado
+
+    ldr w24, [x19]           // Cargar el siguiente número en w24
+    cmp w24, w22
+    ble compare_min          // Si w24 <= w22, salta a compare_min
+
+    mov w22, w24             // Si w24 > w22, actualizar el máximo
+    b update_index           // Ir a actualizar el índice
+
+compare_min:
+    cmp w24, w23
+    bge update_index         // Si w24 >= w23, ir a actualizar el índice
+
+    mov w23, w24             // Si w24 < w23, actualizar el mínimo
+    b update_index           // Ir a actualizar el índice
+
+update_index:
+    add x19, x19, #4         // Mover a la siguiente posición del array
+    add x20, x20, #1         // Incrementar el contador
+    b compare_numbers        // Comparar el siguiente número
+
+print_result:
+    // Imprimir el valor máximo y mínimo
+    ldr x0, =output_fmt
+    mov w1, w22              // Valor máximo
+    mov w2, w23              // Valor mínimo
+    bl printf
+
+    // Salir del programa
+    mov x8, #93              // syscall: exit
+    mov x0, #0               // status: 0
+    svc #0
+
+.section .rodata
