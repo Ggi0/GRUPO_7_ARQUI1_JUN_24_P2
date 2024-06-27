@@ -5,7 +5,8 @@ from flask_cors import CORS
 
 import board
 import busio
-from adafruit_bmp280 import Adafruit_BMP280_I2C
+
+import Adafruit_DHT
 
 import smbus2
 
@@ -41,13 +42,10 @@ Switch_Sensoraire = False
 
 
 
-#globales para sensor de temperatura
+#globales para sensor de temperatura y humedad
 sensor_temp = False
-
-
-#globales para sensor de humedad
 sensor_humedad = False
-
+DHT_SENSOR = Adafruit_DHT.DHT11
 
 #globales para luminosidad
 sensor_luminosidad = False
@@ -68,7 +66,7 @@ sensor_barometrico = False
 PIN_AIRE = 11          #GPIO 17
 
 #Sensor Temperatura y humedad
-PIN_TEMP = 17          #GPIO 4
+PIN_TEMP = 7          #GPIO 4
 
 #Sensor de velocidad viento
 PIN_VIENTO = 22        #GPIO 25
@@ -78,11 +76,15 @@ PIN_LUZ = 13           #GPIO 17
 
 
 # I2C
-#Sensor de Calidad de aire I2C y de Luminosidad I2C
+#Sensor de Calidad de aire I2C, velocidad viento y de Luminosidad I2C
 PCF8591_ADDRESS = 0x48
 bus = smbus2.SMBus(1)
 bus_sensoraire = smbus2.SMBus(1)
-
+bus_aire = smbus2.SMBus(1)
+THRESHOLD = 128
+counter = 0
+last_value = None
+start_time = time.time()
 
 #Sensor de Presion Barometrica I2C
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -244,11 +246,31 @@ def Off_aire():
 
 
 #* Funcion para encender el sensor de Temperatura
+def leer_dht11():
+    # Intenta obtener una lectura del sensor
+    global DHT_SENSOR
+    global PIN_TEMP
+    humedad, temperatura = Adafruit_DHT.read_retry(DHT_SENSOR, PIN_TEMP)
+    
+    if humedad is not None and temperatura is not None:
+        print(f'Temperatura: {temperatura:.1f}�C')
+        print(f'Humedad: {humedad:.1f}%')
+    else:
+        print('Fallo al obtener lectura del sensor. Intenta de nuevo!')
+
 def On_Temperatura():
-    pass
+    global sensor_temp
+    
+    sensor_temp = True
+    while sensor_temp:
+        leer_dht11()
+        time.sleep(2)
 
 def Off_Temperatura():
-    pass
+    global sensor_temp
+    sensor_temp = False
+
+
 
 #* Funcion para encender el sensor de Humedad
 def On_Humedad():
@@ -257,12 +279,68 @@ def On_Humedad():
 def Off_Humedad():
     pass
 
+
+
+
 #* Funcion para encender el sensor de Humedad
+
+
+def read_analog(channel):
+    if channel < 0 or channel > 3:
+        raise ValueError("El canal debe estar entre 0 y 3")
+    
+    # Leer el valor anal�gico del canal seleccionado
+    bus.write_byte(PCF8591_ADDRESS, channel)
+    analog_value = bus.read_byte(PCF8591_ADDRESS)  # Leer el valor
+    
+    return analog_value
+
+
 def On_Viento():
-    pass
+    sensor_viento = True
+    global counter
+    global last_value
+    global start_time
+    global THRESHOLD
+    global datos
+    datos= []
+    last_value = read_analog(2)
+
+    while sensor_viento:
+        # Leer el valor del canal 0 (donde est� conectado el sensor)
+        value = read_analog(2)
+        
+        # Detectar la transici�n de bajo a alto
+        if last_value < THRESHOLD and value >= THRESHOLD:
+            counter += 1
+        
+        # Actualizar el �ltimo valor le�do
+        last_value = value
+        
+        # Calcular el tiempo transcurrido
+        elapsed_time = time.time() - start_time
+        
+        if elapsed_time >= 1.0:
+            # Calcular las RPM (ajustar seg�n el n�mero de ranuras del encoder)
+            slots = 20  # N�mero de ranuras en el disco del encoder
+            rpm = (counter / slots) / elapsed_time * 60
+            
+            # Imprimir las RPM
+            print(f"Velocidad de rotaci�n: {rpm:.2f} RPM")
+            
+            # Reiniciar el contador y el tiempo
+            counter = 0
+            start_time = time.time()
+            datos.append(rpm)
+            time.sleep(1)
+
+
 
 def Off_Viento():
-    pass
+    global sensor_viento
+    global bus
+    sensor_viento = False
+    bus.close()
 
 #* Funcion para apagar el sensor de luminosidad
 def Luminosidad_analogo(channel):

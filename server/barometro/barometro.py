@@ -8,7 +8,7 @@ lib.sum_array.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
 lib.sum_array.restype = ctypes.c_float
 
 # Definir el arreglo de n�meros
-numbers = [1.6, 3.5, 3.4, 4.6,6.9]
+numbers = [1.6, 3.5, 3.4, 4.6, 6.9]
 num_elements = len(numbers)
 
 # Convertir el arreglo a un tipo que ctypes pueda manejar

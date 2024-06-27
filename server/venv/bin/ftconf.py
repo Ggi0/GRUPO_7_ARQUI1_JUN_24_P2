@@ -1,4 +1,4 @@
-#!/home/pi/GRUPO_7_ARQUI1_JUN_24_P2/server/venv/bin/python3
+#!/home/pi/pruebas asm/GRUPO_7_ARQUI1_JUN_24_P2/server/venv/bin/python3
 
 """Simple FTDI EEPROM configurator.
 """
