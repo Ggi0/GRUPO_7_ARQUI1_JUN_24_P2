@@ -1,22 +1,20 @@
 import ctypes
-import os
 
-# Cargar la biblioteca compartida
-lib = ctypes.CDLL(os.path.abspath("barometro.so"))
+# Cargar la librer�a compartida
+lib = ctypes.CDLL('./libadd_floats.so')
 
-# Crear un arreglo en Python
-py_array = [6.0, 2.01, 3.23, 2.1]
+# Definir el prototipo de la funci�n
+lib.sum_array.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
+lib.sum_array.restype = ctypes.c_float
 
-# Convertir el arreglo de Python a un arreglo de C
-c_array = (ctypes.c_float * len(py_array))(*py_array)
+# Definir el arreglo de n�meros
+numbers = [1.6, 3.5, 3.4, 4.6,6.9]
+num_elements = len(numbers)
 
-def main():
-    
-    # Declarar los tipos de retorno y argumentos de las funciones ensamblador
-    lib.sum_array.restype = ctypes.c_float
-    lib.sum_array.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int]
-    result = lib.sum_array(c_array, len(py_array))
-    print(f"Resultado de la suma: {result}")
+# Convertir el arreglo a un tipo que ctypes pueda manejar
+ArrayType = ctypes.c_float * num_elements
+c_array = ArrayType(*numbers)
 
-if __name__ == "__main__":
-    main()
+# Llamar a la funci�n y obtener el resultado
+result = lib.sum_array(c_array, num_elements)
+print(f"Resultado de la suma del arreglo: {result}")
