@@ -2,21 +2,17 @@
 #* Los from son las librerias que vamos a utilizar en nuestro servidor pero solo algunas funciones de ellas
 from flask      import Flask, request, jsonify
 from flask_cors import CORS
-
-import board
-import busio
-
-import adafruit_dht
 from adafruit_bmp280 import Adafruit_BMP280_I2C
-
-import smbus2
-
-import ctypes
-import os
 
 #* Los imports son las librerias que vamos a utilizar en nuestro servidor pero todas las funciones de ellas
 import sys
 import time
+import board
+import busio
+import adafruit_dht
+import smbus2
+import ctypes
+import os
 
 #* creamos una instancia de la clase Flask
 app = Flask(__name__)

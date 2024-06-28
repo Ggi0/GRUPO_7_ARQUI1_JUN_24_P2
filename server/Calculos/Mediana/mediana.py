@@ -1,23 +1,21 @@
 import ctypes
-import os
 
-# Load the shared library
-lib_prmd = ctypes.CDLL(os.path.abspath("libprmedian.so"))
+# Cargar la librer�a compartida
+lib = ctypes.CDLL('./mediana.so')
+# Definir el prototipo de la funci�n
+lib.calcular_mediana.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+lib.calcular_mediana.restype = ctypes.c_double
 
-# Define the argument and return types for the function
-lib_prmd.calculate_median.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
-lib_prmd.calculate_median.restype = ctypes.c_float
+# Definir el arreglo de n�meros y el tama�o
+numbers = [1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5]
+num_elements = len(numbers)
 
-def calculate_median(numbers):
-    # Convert Python list to C array
-    arr = (ctypes.c_float * len(numbers))(*numbers)
-    
-    # Call the C function
-    result = lib_prmd.calculate_median(arr, len(numbers))
-    
-    return result
+# Convertir el arreglo a un tipo que ctypes pueda manejar
+c_array = (ctypes.c_double * num_elements)(*numbers)
 
-# Test the function
-numbers = [7.1, 15.2, 3.3, 110.4, 1.5, 220.6, 5.8, 2.9, 190.0]
-median = calculate_median(numbers)
-print(f"The median is: {median}")
+# Convertir el tama�o a un tipo que ctypes pueda manejar
+c_size = ctypes.c_int(num_elements)
+
+# Llamar a la funci�n y obtener la mediana
+result = lib.calcular_mediana(c_array, c_size)
+print(f"La mediana es: {result}")

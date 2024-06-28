@@ -1,6 +1,6 @@
-.global sum_array
+.global desEstandar
 
-sum_array:
+desEstandar:
 // x0 = puntero al arreglo, x1 = n?mero de elementos
     mov w2, #0                // Inicializar el ?ndice
     fmov s0, wzr              // Inicializar la suma a 0.0

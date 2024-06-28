@@ -1,71 +1,26 @@
-.global calculate_median
+.global calcular_mediana
 
-.data
-a:                                      // No se define un tamaño estático aquí
-b: .quad 0
+calcular_mediana:
+    // x0 = puntero al arreglo, x1 = n�mero de elementos
+    mov x2, x1                // Copiar el n�mero de elementos a x2 (se usar� como contador)
+    lsr x2, x2, #1            // x2 = x1 / 2 (tama�o del subarreglo medio)
 
-.bss
-c: .space 64
+    // Ordenar el arreglo usando una funci�n de ordenamiento (omitiendo detalles aqu�)
 
-.text
-calculate_median:
-    // Guardar el frame pointer y el link register
-    stp x29, x30, [sp, #-16]!
-    mov x29, sp
+    // Verificar si el tama�o del arreglo es impar
+    tst x1, 1
+    b.ne odd_case              // Si es impar, ir al caso impar
 
-    // Cargar dirección del arreglo y tamaño
-    ldr x0, =a
-    ldr x1, =b
-    ldr x1, [x1]
-
-    // Llamar a la función de ordenamiento
-    bl func1
-
-    // Calcular la mediana
-    ldr x0, =a
-    ldr x1, =b
-    ldr x1, [x1]
-    ldr x2, =c
-    bl func2
-
-    // Cargar el resultado en s0 (32 bits para float)
-    ldr s0, [x2]
-
-    // Convertir s0 a double en d0 para retorno
-    scvtf d0, s0
-
-    // Restaurar frame pointer y link register, y retornar
-    ldp x29, x30, [sp], #16
+    // Caso par: calcular media de los dos elementos centrales
+    sub x3, x2, #1             // x3 = x2 - 1 (�ndice del primer elemento central)
+    ldr s0, [x0, x2, lsl #2]   // Cargar el primer elemento central en s0
+    ldr s1, [x0, x3, lsl #2]   // Cargar el segundo elemento central en s1
+    fadd s0, s0, s1            // s0 = s0 + s1
+    fmov s1, #2.0              // Cargar 2.0 en s1
+    fdiv s0, s0, s1            // s0 = s0 / 2.0
     ret
 
-// Función de ordenamiento (omitiendo detalles, similar a la anterior)
-func1:
-
-// Función para calcular la mediana con arreglo de tamaño dinámico
-func2:
-    tst x1, 1
-    b.ne odd_case
-
-    // Caso par
-    mov x3, x1, lsr 1
-    sub x4, x3, 1
-    lsl x3, x3, 2
-    lsl x4, x4, 2
-    add x5, x0, x3
-    add x6, x0, x4
-
-    ldr s0, [x5]
-    ldr s1, [x6]
-    fadd s2, s0, s1
-    fmov s3, 2.0
-    fdiv s2, s2, s3
-
-    b store_result
-
 odd_case:
-    // Caso impar (implementación no mostrada en detalle)
-
-store_result:
-    // Almacenar el resultado en c
-    str s0, [x2]
+    // Caso impar: el elemento central es la mediana
+    ldr s0, [x0, x2, lsl #2]   // Cargar el elemento central en s0
     ret
