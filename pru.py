@@ -1,22 +1,29 @@
-import Adafruit_DHT
+import smbus
 import time
 
-# Configuraci�n del tipo de sensor y del pin GPIO al que est� conectado
-sensor = Adafruit_DHT.DHT11
-pin = 4  # Reemplaza con el pin GPIO que est�s usando
+# Direcci�n I2C del PCF8591
+PCF8591_ADDRESS = 0x48
 
-def leer_dht11():
-    # Intenta obtener una lectura del sensor
-    humedad, temperatura = Adafruit_DHT.read_retry(sensor, pin)
-    
-    if humedad is not None and temperatura is not None:
-        print(f'Temperatura: {temperatura:.1f}�C')
-        print(f'Humedad: {humedad:.1f}%')
-    else:
-        print('Fallo al obtener lectura del sensor. Intenta de nuevo!')
+# Comando para leer el canal AO0 (anal�gico)
+PCF8591_AO0 = 0x00
 
-# Bucle principal
-while True:
-    leer_dht11()
-    time.sleep(2)  # Espera 2 segundos antes de la pr�xima lectura
+# Inicializar el bus I2C
+bus = smbus.SMBus(1)  # Para Raspberry Pi 4, usualmente se usa bus 1
 
+def read_ao0():
+    # Leer el valor anal�gico del canal AO0
+    bus.write_byte(PCF8591_ADDRESS, PCF8591_AO0)
+    value = bus.read_byte(PCF8591_ADDRESS)  # Lectura dummy
+    value = bus.read_byte(PCF8591_ADDRESS)
+    return value
+
+def main():
+    while True:
+        ao0_value = read_ao0()
+        # Convertir el valor le�do a voltaje (si es necesario)
+        voltage = ao0_value / 255.0 * 3.3  # Si la alimentaci�n es de 3.3V
+        print(f"AO0 Value: {ao0_value}, Voltage: {voltage:.2f}V")
+        time.sleep(1)
+
+if __name__ == "__main__":
+    main()

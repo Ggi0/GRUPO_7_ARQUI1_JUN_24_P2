@@ -37,9 +37,8 @@ resultados = []
 
 #globales para sensor de calidad de aire
 
-sensor_aire = False
-valor_sensoraire = 0
-Switch_Sensoraire = False 
+PCF8591_ADDRESS = 0x48
+PCF8591_AO0 = 0x00
 
 #globales para sensor de temperatura y humedad
 sensor_temp = False
@@ -198,47 +197,42 @@ def Data_Sensor():
 def On_aire():
     global sensor_aire
     sensor_aire = True
+    while sensor_aire:
+        ao0_value = read_ao0()
+        # Convertir el valor le�do a voltaje (si es necesario)
+        voltage = ao0_value / 255.0 * 3.3  # Si la alimentaci�n es de 3.3V
+        print(f"AO0 Value: {ao0_value}, Voltage: {voltage:.2f}V")
+        clasificacion(ao0_value)
+        time.sleep(10)
 
     print("Leyendo datos de la calidad de aire de la zona...")
-    Datos_sensoraire()
 
-def leerADC(canal):
-    global bus_sensoraire
-    global PCF8591_ADDRESS
-    global valor_sensoraire
-
-    bus_sensoraire.write_byte(PCF8591_ADDRESS, canal)
-    valor_sensoraire = bus_sensoraire.read_byte(PCF8591_ADDRESS)
-    return valor_sensoraire
-
-
-def Clasificar_Calidad(aireVoltaje):
-    if aireVoltaje < 1.5:
-        return "Calidad de Aire Buena..."
-    else:
-        return "Calidad de Aire Mala..."
-
-def Datos_sensoraire():
-    global valor_sensoraire
-    global Switch_Sensoraire
-    Switch_Sensoraire = True
-
-    global datos    
+def clasificacion(analog_value):
+    global datos
     datos = []
+    # Convertir el valor anal�gico a una concentraci�n aproximada de CO2
+    # Nota: Esta conversi�n es aproximada y depende de la calibraci�n espec�fica del sensor MQ-135
+    # Aqu� asumimos que el valor anal�gico de 0 a 255 se mapea a una concentraci�n de CO2 en ppm
+    co2_concentration = analog_value / 255.0 * 10000  # Ejemplo de mapeo: 0-255 a 0-10000 ppm
 
-    while Switch_Sensoraire:
-        Valor_adc = leerADC(0x40)
-        # El voltaje es el valor que se tomara para el arm
-        Voltage = Valor_adc / 255.0 * 3.3
-        print(f"Voltaje obtenido: {Voltage: .2f} V")
-        datos.append(Voltage)
-        # Clasifica la calidad del aire de la zona
-        sesgo = Clasificar_Calidad(Voltage)
-        print(sesgo)
-        time.sleep(10)
-        
-    print("Sensor de calidad de aire desactivado...")
-    
+    # Clasificar la calidad del aire bas�ndose en la concentraci�n de CO2
+    if co2_concentration < 1000:
+        print("Buena")
+        datos.append(1)
+
+    else:
+        print("Mala")
+        datos.append(0)
+
+def read_ao0():
+    global PCF8591_ADDRESS
+    global PCF8591_AO0
+    # Leer el valor anal�gico del canal AO0
+    bus.write_byte(PCF8591_ADDRESS, PCF8591_AO0)
+    value = bus.read_byte(PCF8591_ADDRESS)  # Lectura dummy
+    value = bus.read_byte(PCF8591_ADDRESS)
+    return value
+
 
 def Off_aire():
     global Switch_Sensoraire
@@ -284,7 +278,7 @@ def On_Temp_Hum(tipo_sensor):
             raise error
 
         # Esperar antes de la pr�xima lectura
-        time.sleep(2.0)
+        time.sleep(10)
 
 
 def Off_Temp_Hum():
@@ -343,7 +337,7 @@ def On_Viento():
             counter = 0
             start_time = time.time()
             datos.append(rpm)
-            time.sleep(1)
+            time.sleep(10)
 
 
 
@@ -438,6 +432,10 @@ def calculos_estadisticos():
     result_suma = lib.desviacion(c_array, len(datos))
     print(f"La suma de los valores es: {result_suma}")
     resultados.append(result_suma)
+
+    #Resultados de la calidad de aire
+    cont1 = lib.conteo1(c_array, len(datos))
+    cont0 = lib.conteo0(c_array, len(datos))
     
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
