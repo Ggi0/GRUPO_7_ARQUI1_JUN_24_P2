@@ -6,7 +6,8 @@ from flask_cors import CORS
 import board
 import busio
 
-import Adafruit_DHT
+import adafruit_dht
+from adafruit_bmp280 import Adafruit_BMP280_I2C
 
 import smbus2
 
@@ -40,12 +41,8 @@ sensor_aire = False
 valor_sensoraire = 0
 Switch_Sensoraire = False 
 
-
-
 #globales para sensor de temperatura y humedad
 sensor_temp = False
-sensor_humedad = False
-DHT_SENSOR = Adafruit_DHT.DHT11
 
 #globales para luminosidad
 sensor_luminosidad = False
@@ -66,7 +63,7 @@ sensor_barometrico = False
 PIN_AIRE = 11          #GPIO 17
 
 #Sensor Temperatura y humedad
-PIN_TEMP = 7          #GPIO 4
+dht_device = adafruit_dht.DHT11(board.D4)  # Usa el pin GPIO4
 
 #Sensor de velocidad viento
 PIN_VIENTO = 22        #GPIO 25
@@ -108,10 +105,13 @@ def On_Sensor():
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
         print("Sensor Temperatura encendido")  
+        On_Temp_Hum('temp')
     elif sensor == '13':
         print("Sensor Humedad encendido")
+        On_Temp_Hum('hum')
     elif sensor == '14':
         print("Sensor Velocidad viento encendido")
+        On_Viento()
     elif sensor == '15':
         print("Sensor Luminosidad encendido")
         On_luminosidad()
@@ -138,10 +138,13 @@ def Off_Sensor():
     #* Aqui se debe de agregar la logica para apagar el sensor
     if   sensor == '12':
         print("Sensor Temperatura apagado")  
+        Off_Temp_Hum()
     elif sensor == '13':
         print("Sensor Humedad apagado")
+        Off_Temp_Hum()
     elif sensor == '14':
         print("Sensor Velocidad viento apagado")
+        Off_Viento()
     elif sensor == '15':
         print("Sensor Luminosidad apagado")
         Off_luminosidad()
@@ -246,43 +249,48 @@ def Off_aire():
 
 
 #* Funcion para encender el sensor de Temperatura
-def leer_dht11():
-    # Intenta obtener una lectura del sensor
-    global DHT_SENSOR
-    global PIN_TEMP
-    humedad, temperatura = Adafruit_DHT.read_retry(DHT_SENSOR, PIN_TEMP)
-    
-    if humedad is not None and temperatura is not None:
-        print(f'Temperatura: {temperatura:.1f}�C')
-        print(f'Humedad: {humedad:.1f}%')
-    else:
-        print('Fallo al obtener lectura del sensor. Intenta de nuevo!')
-
-def On_Temperatura():
+def On_Temp_Hum(tipo_sensor):
     global sensor_temp
-    
-    sensor_temp = True
-    while sensor_temp:
-        leer_dht11()
-        time.sleep(2)
+    global dht_device
+    global datos
 
-def Off_Temperatura():
+    datos = []
+    sensor_temp = True
+    # Intenta obtener una lectura del sensor
+    while sensor_temp:
+        try:
+            # Intentar leer la temperatura y la humedad
+            temperature_c = dht_device.temperature
+            humidity = dht_device.humidity
+
+            # Imprimir los valores le�dos
+            print(f"Temperatura: {temperature_c:.1f} �C")
+            print(f"Humedad: {humidity:.1f} %")
+            if tipo_sensor == 'temp':
+                datos.append(temperature_c)
+            else:
+                datos.append(humidity)
+
+
+        except RuntimeError as error:
+            # Errores de lectura son comunes con los sensores DHT, simplemente intenta nuevamente
+            print(f"Error al leer el sensor: {error.args[0]}")
+
+        except Exception as error:
+            dht_device.exit()
+            raise error
+
+        # Esperar antes de la pr�xima lectura
+        time.sleep(2.0)
+
+
+def Off_Temp_Hum():
     global sensor_temp
     sensor_temp = False
 
 
 
-#* Funcion para encender el sensor de Humedad
-def On_Humedad():
-    pass
-
-def Off_Humedad():
-    pass
-
-
-
-
-#* Funcion para encender el sensor de Humedad
+#* Funcion para encender el sensor de Viento
 
 
 def read_analog(channel):
@@ -445,9 +453,6 @@ def calculos_estadisticos():
     print(f"La suma de los valores es: {result_suma}")
     resultados.append(result_suma)
     
-    
-
-
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:

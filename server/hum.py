@@ -5,7 +5,7 @@ import adafruit_dht
 
 # Inicializar el sensor DHT (por ejemplo, DHT22)
 # Nota: Si usas DHT11, reemplaza adafruit_dht.DHT22 por adafruit_dht.DHT11
-dht_device = adafruit_dht.DHT22(board.D26 )  # Usa el pin GPIO4
+dht_device = adafruit_dht.DHT11(board.D4)  # Usa el pin GPIO4
 
 while True:
     try:
