@@ -63,7 +63,7 @@ sensor_barometrico = False
 PIN_AIRE = 11          #GPIO 17
 
 #Sensor Temperatura y humedad
-dht_device = adafruit_dht.DHT11(board.D4)  # Usa el pin GPIO4
+dht_device = None # Usa el pin GPIO4
 
 #Sensor de velocidad viento
 PIN_VIENTO = 22        #GPIO 25
@@ -170,7 +170,7 @@ def Estadistics_Sensor():
                 "label": 'Revenue',
                 "backgroundColor": '#4e73df',
                 "borderColor": '#4e73df',
-                "data": [datos[0], datos[1], datos[2], datos[3], datos[4], datos[5]],
+                "data": [resultados[0], resultados[1], resultados[2], resultados[3], resultados[4], resultados[5]],
             },
         ],
     }
@@ -180,13 +180,14 @@ def Estadistics_Sensor():
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
     # Aquí es donde obtendrías los datos del sensor en la vida real
+    calculos_estadisticos()
     data = {
-        "Promedio": datos[0],
-        "Mediana": datos[1],
-        "DesviacionEstandar": datos[2],
-        "Máximo": datos[3],
-        "Mínimo": datos[4],
-        "Moda": datos[5]
+        "Promedio": resultados[0],
+        "Mediana": resultados[1],
+        "DesviacionEstandar": resultados[2],
+        "Máximo": resultados[3],
+        "Mínimo": resultados[4],
+        "Moda": resultados[5]
     }
     return jsonify(data)
 
@@ -254,6 +255,8 @@ def On_Temp_Hum(tipo_sensor):
     global dht_device
     global datos
 
+
+    dht_device = adafruit_dht.DHT11(board.D4)  # Usa el pin GPIO4
     datos = []
     sensor_temp = True
     # Intenta obtener una lectura del sensor
@@ -375,23 +378,6 @@ def On_luminosidad():
     while sensor_luminosidad:
         analog_value = Luminosidad_analogo(1)  # Leer desde el canal AO1
         print("Valor analogico leido desde AO1: ", analog_value)
-        
-        """
-        # Interpretaciï¿½n de los valores
-        if analog_value > 200:
-            print("Muy oscuro")
-        elif 150 < analog_value <= 200:
-            print("Oscuridad baja")
-        elif 100 < analog_value <= 150:
-            print("Luz media")
-        elif 50 < analog_value <= 100:
-            print("Luz alta")
-        else:
-            print("Muy iluminado")
-        
-        """
-        
-        
         time.sleep(10)
         
         
@@ -449,7 +435,7 @@ def calculos_estadisticos():
     
     c_array = (ctypes.c_int * len(datos))(*datos)
     
-    result_suma = lib.sum_array(c_array, len(datos))
+    result_suma = lib.desviacion(c_array, len(datos))
     print(f"La suma de los valores es: {result_suma}")
     resultados.append(result_suma)
     
