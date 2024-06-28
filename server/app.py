@@ -427,11 +427,39 @@ def calculos_estadisticos():
     
     resultados = []
     
-    c_array = (ctypes.c_int * len(datos))(*datos)
+    #* Calculo para la Desviacion Estandar arm 64 bits
+    # Cargar la libreria compartida
+    lib = ctypes.CDLL('./Calculos/desEstandar/desEstandar.so')
+
+    # Definir el prototipo de la funci�n
+    lib.desEstandar.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
+    lib.desEstandar.restype = ctypes.c_float
+
+    # Definir el arreglo de numeros
+    num_elements = len(datos)
+
+    # Convertir el arreglo a un tipo que ctypes pueda manejar
+    ArrayType = ctypes.c_float * num_elements
+    c_array = ArrayType(*datos)
+
+    # Llamar a la funcion y obtener el resultado
+    desEstandar = lib.desEstandar(c_array, num_elements)
     
-    result_suma = lib.desviacion(c_array, len(datos))
-    print(f"La suma de los valores es: {result_suma}")
-    resultados.append(result_suma)
+    resultados.append(desEstandar)
+    
+    #*---------------------------------------------------------
+    #* Calculo para la Mediana arm 64 bits
+    # Cargar la libreria compartida
+    lib = ctypes.CDLL('./Calculos/Mediana/mediana.so')
+    
+    # Definir el prototipo de la funcion
+    lib.mediana.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
+    lib.mediana.restype = ctypes.c_float
+
+    # Llamar a la funcion y obtener el resultado
+    mediana = lib.mediana(c_array, num_elements)
+    
+    resultados.append(mediana)
 
     #Resultados de la calidad de aire
     cont1 = lib.conteo1(c_array, len(datos))
