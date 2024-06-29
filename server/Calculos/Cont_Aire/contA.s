@@ -6,7 +6,7 @@ onteo1:
     
 
     // Crear un bucle que recorra el arreglo
-    contador_loop:
+    contador_loop1:
         //Si x1 (la longitud del arreglo) es 0, hemos terminado
         cbz x1, fin
 
@@ -23,13 +23,13 @@ onteo1:
         b contador_loop
 
 
-    sum:
+    sum1:
         add w2, w2, #1
         sub x1, x1, #1
         // Volver al inicio del bucle
         b contador_loop
 
-    fin:
+    fin1:
             // Mover el valor del contador a x0
         mov w0, w2
             // Retornar

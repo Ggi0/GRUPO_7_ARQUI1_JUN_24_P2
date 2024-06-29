@@ -224,7 +224,7 @@ def Data_Sensor():
 
 #* Funcion para obtener los datos del sensor seleccionado
 @app.route('/api/update', methods=['GET'])
-def Data_Sensor():
+def Data_Sensor_up():
     global estado_actual
 
     data = {
