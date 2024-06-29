@@ -47,7 +47,8 @@ function App() {
     "DesEstandar": 0,
     "Max": 0,
     "Min": 0,
-    "Moda": 0
+    "Moda": 0,
+    "Conteo": 0,
   });
 
   const fetchDataClick = (url) => {
@@ -243,6 +244,7 @@ function App() {
                       <td>{calData.Max}</td>
                       <td>{calData.Min}</td>
                       <td>{calData.Moda}</td>
+                      <td>{calData.Conteo}</td>
                     </tr>
                     <tr></tr>
                   </tbody>
