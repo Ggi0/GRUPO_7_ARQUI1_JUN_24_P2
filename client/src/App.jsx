@@ -53,13 +53,13 @@ function App() {
 
   const fetchDataClick = (url) => {
     axios.get(url)
-        .then(response => {
-            setData(response.data);
-        })
-        .catch(error => {
-          console.error('Hubo un error!', error);
-          // Manejar el error aquí, como mostrar un mensaje de error
-        });  
+      .then(response => {
+        setData(response.data);
+      })
+      .catch(error => {
+        console.error('Hubo un error!', error);
+        // Manejar el error aquí, como mostrar un mensaje de error
+      });
   };
 
   // ----------------- Graphic Interface -----------------
@@ -70,13 +70,13 @@ function App() {
 
   const fetchDataGraf = (url) => {
     axios.get(url)
-        .then(response => {
-            setChartData(response.data);
-        })
-        .catch(error => {
-          console.error('Hubo un error!', error);
-          // Manejar el error aquí, como mostrar un mensaje de error
-        });  
+      .then(response => {
+        setChartData(response.data);
+      })
+      .catch(error => {
+        console.error('Hubo un error!', error);
+        // Manejar el error aquí, como mostrar un mensaje de error
+      });
   };
 
   const chartOptions = {
@@ -144,6 +144,123 @@ function App() {
           <h2 className="text-uppercase text-center text-secondary">Sensores</h2>
           <hr className="star-dark mb-5" />
           <div className="row">
+            <div className="col-md-6 col-lg-12 offset-lg-0">
+              <h4>Estado Actual</h4>
+              <form>
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Sensores</th>
+                        <th>Estados</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <i className="fa fa-thermometer-empty" style={{ fontSize: '20px', width: '18px', margin: '5px' }}></i>
+                          Temperatura
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            className="bi bi-water"
+                            style={{ width: '20px', fontSize: '20px', margin: '5px' }}
+                          >
+                            <path d="M.036 3.314a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 3.964a.5.5 0 0 1-.278-.65zm0 3a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 6.964a.5.5 0 0 1-.278-.65zm0 3a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 9.964a.5.5 0 0 1-.278-.65zm0 3a.5.5 0 0 1 .65-.278l1.757.703a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.014-.406a2.5 2.5 0 0 1 1.857 0l1.015.406a1.5 1.5 0 0 0 1.114 0l1.757-.703a.5.5 0 1 1 .372.928l-1.758.703a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0l-1.014-.406a1.5 1.5 0 0 0-1.114 0l-1.015.406a2.5 2.5 0 0 1-1.857 0L.314 12.964a.5.5 0 0 1-.278-.65z"></path>
+                          </svg>
+                          Humedad
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            className="bi bi-wind"
+                            style={{ margin: '5px', width: '20px', fontSize: '20px' }}
+                          >
+                            <path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5m-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2M0 9.5A.5.5 0 0 1 .5 9h10.042a3 3 0 1 1-3 3 .5.5 0 0 1 1 0 2 2 0 1 0 2-2H.5a.5.5 0 0 1-.5-.5"></path>
+                          </svg>
+                          Velocidad
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            className="bi bi-lightning-charge"
+                            style={{ fontSize: '20px' }}
+                          >
+                            <path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09zM4.157 8.5H7a.5.5 0 0 1 .478.647L6.11 13.59l5.732-6.09H9a.5.5 0 0 1-.478-.647L9.89 2.41z"></path>
+                          </svg>
+                          Luminocidad
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            className="bi bi-cloud-haze2-fill"
+                            style={{ fontSize: '20px', width: '30px' }}
+                          >
+                            <path d="M8.5 2a5.001 5.001 0 0 1 4.905 4.027A3 3 0 0 1 13 12H3.5A3.5 3.5 0 0 1 .035 9H5.5a.5.5 0 0 0 0-1H.035a3.5 3.5 0 0 1 3.871-2.977A5.001 5.001 0 0 1 8.5 2m-6 8a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zM0 13.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"></path>
+                          </svg>
+                          Calidad de Aire
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            fill="currentColor"
+                            viewBox="0 0 16 16"
+                            className="bi bi-person-lines-fill"
+                            style={{ fontSize: '20px', width: '30px' }}
+                          >
+                            <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"></path>
+                          </svg>
+                          Barometro
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  style={{ background: 'rgb(188,132,24)', width: '103.675px', height: '39.2px', margin: '5px' }}
+                >
+                  Actualizar
+                </button>
+              </form>
+            </div>
+
             <div className="col-md-6 col-lg-7">
               <form>
                 <label className="form-label" style={{ marginTop: '10px', marginLeft: '5px' }}>
