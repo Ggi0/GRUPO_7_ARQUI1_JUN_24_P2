@@ -220,11 +220,24 @@ def Data_Sensor():
             "Conteo0": 0 #aire malo
             
         } 
+    return jsonify(data)
+
+#* Funcion para obtener los datos del sensor seleccionado
+@app.route('/api/update', methods=['GET'])
+def Data_Sensor():
+    global estado_actual
+
+    data = {
+        "Temperatura": estado_actual[0],
+        "Humedad": estado_actual[1],
+        "Velocidad": estado_actual[2],
+        "Luminocidad": estado_actual[3],
+        "Calidad_Aire": estado_actual[4],
+        "Barometro": estado_actual[5], 
+    } 
 
     
     return jsonify(data)
-
-
 
 
 # ------------------------- FUNCIONES ---------------------------

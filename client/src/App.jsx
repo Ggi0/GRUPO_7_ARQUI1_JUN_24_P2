@@ -19,6 +19,28 @@ import axios from 'axios';
 
 function App() {
 
+  // ----------------- Tabla de Sensores ------------
+  const [upData, setupData] = useState({
+    "Temperatura": 0,
+    "Humedad": 0,
+    "Velocidad": 0,
+    "Luminocidad": 0,
+    "Calidad_Aire": 0,
+    "Barometro": 0,
+  });
+
+  const fetchDataClick = (url) => {
+    axios.get(url)
+      .then(response => {
+        setData(response.data);
+      })
+      .catch(error => {
+        console.error('Hubo un error!', error);
+        // Manejar el error aquí, como mostrar un mensaje de error
+      });
+  };
+
+
   // ----------------- Codigo de los sensores ------------
   const [selectedSensor, setSelectedSensor] = useState("12");
 
@@ -51,7 +73,7 @@ function App() {
     "Conteo": 0,
   });
 
-  const fetchDataClick = (url) => {
+  const handleButtonUpdate = (url) => {
     axios.get(url)
       .then(response => {
         setData(response.data);
@@ -161,7 +183,7 @@ function App() {
                           <i className="fa fa-thermometer-empty" style={{ fontSize: '20px', width: '18px', margin: '5px' }}></i>
                           Temperatura
                         </td>
-                        <td></td>
+                        <td>{upData.Temperatura}</td>
                       </tr>
                       <tr>
                         <td>
@@ -178,7 +200,7 @@ function App() {
                           </svg>
                           Humedad
                         </td>
-                        <td></td>
+                        <td>{upData.Humedad}</td>
                       </tr>
                       <tr>
                         <td>
@@ -195,7 +217,7 @@ function App() {
                           </svg>
                           Velocidad
                         </td>
-                        <td></td>
+                        <td>{upData.Velocidad}</td>
                       </tr>
                       <tr>
                         <td>
@@ -212,7 +234,7 @@ function App() {
                           </svg>
                           Luminocidad
                         </td>
-                        <td></td>
+                        <td>{upData.Luminocidad}</td>
                       </tr>
                       <tr>
                         <td>
@@ -229,7 +251,7 @@ function App() {
                           </svg>
                           Calidad de Aire
                         </td>
-                        <td></td>
+                        <td>{upData.Calidad_Aire}</td>
                       </tr>
                       <tr>
                         <td>
@@ -246,7 +268,7 @@ function App() {
                           </svg>
                           Barometro
                         </td>
-                        <td></td>
+                        <td>{upData.Barometro}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -255,6 +277,7 @@ function App() {
                   className="btn btn-primary"
                   type="button"
                   style={{ background: 'rgb(188,132,24)', width: '103.675px', height: '39.2px', margin: '5px' }}
+                  onClick={() => handleButtonUpdate('http://127.0.0.1:8000/api/update')}
                 >
                   Actualizar
                 </button>
@@ -351,6 +374,9 @@ function App() {
                       <th>Máximo</th>
                       <th>Mínimo</th>
                       <th>Moda</th>
+                      <th>Conteo</th>
+                      <th>Aire Sano</th>
+                      <th>Aire Contaminado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -362,6 +388,8 @@ function App() {
                       <td>{calData.Min}</td>
                       <td>{calData.Moda}</td>
                       <td>{calData.Conteo}</td>
+                      <td>{calData.Conteo1}</td>
+                      <td>{calData.Conteo0}</td>
                     </tr>
                     <tr></tr>
                   </tbody>
@@ -376,11 +404,6 @@ function App() {
                   <div style={{ marginTop: '10px', marginLeft: '0px', marginBottom: '10px' }}>
                     <Bar data={chartData} options={chartOptions} />
                   </div>
-                  <h4 className="card-title">Title</h4>
-                  <p className="card-text">
-                    Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in,
-                    egestas eget quam. Donec id elit non mi porta gravida at eget metus.
-                  </p>
                 </div>
               </div>
             </div>
