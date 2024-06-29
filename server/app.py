@@ -181,16 +181,19 @@ def Estadistics_Sensor():
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
     global resultados
-    resultados = []
     # Aquí es donde obtendrías los datos del sensor en la vida real
     calculos_estadisticos()
+    print (resultados)
+
+
     data = {
         "Promedio": resultados[0],
         "Mediana": resultados[1],
-        "DesviacionEstandar": resultados[2],
-        "Máximo": resultados[3],
-        "Mínimo": resultados[4],
+        "DesEstandar": resultados[2],
+        "Max": resultados[3],
+        "Min": resultados[4],
         "Moda": resultados[5]
+        
     }
     return jsonify(data)
 
@@ -565,7 +568,7 @@ def calculos_estadisticos():
 #* El try es para manejar los errores que se puedan presentar en el servidor
 try:
     if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=8000, debug=True)
+        app.run(host='0.0.0.0', port=8000)
 except KeyboardInterrupt:
     print("\nLectura finalizada por el usuario.")
     sys.exit(0)
