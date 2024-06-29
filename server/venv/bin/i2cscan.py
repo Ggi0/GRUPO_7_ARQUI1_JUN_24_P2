@@ -1,4 +1,4 @@
-#!/home/pi/pruebas asm/GRUPO_7_ARQUI1_JUN_24_P2/server/venv/bin/python3
+#!/home/pi/Documents/GRUPO_7_ARQUI1_JUN_24_P2/server/venv/bin/python
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2018-2024, Emmanuel Blot <emmanuel.blot@free.fr>

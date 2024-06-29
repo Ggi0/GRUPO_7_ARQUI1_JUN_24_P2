@@ -13,16 +13,12 @@ import adafruit_dht
 import smbus2
 import ctypes
 import os
+import random
 
 #* creamos una instancia de la clase Flask
 app = Flask(__name__)
 #* creamos una instancia de la clase CORS
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
-
-
-#------------------------- BLIBLIOTECA COMPARTIDA ---------------------------
-lib = ctypes.CDLL(os.path.abspath("calculos.so"))
-
 
 # ------------------------ DATOS --------------------------
 datos = []
@@ -91,6 +87,8 @@ bmp280.sea_level_pressure = 1013.25  # Presion al nivel del mar en hPa
 #* Funcion para encender el sensor seleccionado
 @app.route('/api/on', methods=['POST'])
 def On_Sensor():
+    global datos
+    datos = []
     data = request.get_json()
     sensor = data.get('sensor')
     
@@ -100,22 +98,29 @@ def On_Sensor():
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
         print("Sensor Temperatura encendido")  
-        On_Temp_Hum('temp')
+        #On_Temp_Hum('temp')
+        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+
     elif sensor == '13':
         print("Sensor Humedad encendido")
-        On_Temp_Hum('hum')
+        #On_Temp_Hum('hum')
+        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '14':
         print("Sensor Velocidad viento encendido")
-        On_Viento()
+        #On_Viento()
+        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '15':
         print("Sensor Luminosidad encendido")
-        On_luminosidad()
+        #On_luminosidad()
+        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '16':
         print("Sensor Calidad de aire encendido")
-        On_aire()
+        #On_aire()
+        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '17':
         print("Sensor Presion Barometrica encendido")
-        On_Presure_Barometric()
+        #On_Presure_Barometric()
+        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -133,22 +138,22 @@ def Off_Sensor():
     #* Aqui se debe de agregar la logica para apagar el sensor
     if   sensor == '12':
         print("Sensor Temperatura apagado")  
-        Off_Temp_Hum()
+        #Off_Temp_Hum()
     elif sensor == '13':
         print("Sensor Humedad apagado")
-        Off_Temp_Hum()
+        #Off_Temp_Hum()
     elif sensor == '14':
         print("Sensor Velocidad viento apagado")
-        Off_Viento()
+        #Off_Viento()
     elif sensor == '15':
         print("Sensor Luminosidad apagado")
-        Off_luminosidad()
+        #Off_luminosidad()
     elif sensor == '16':
         print("Sensor Calidad de aire apagado")
-        Off_aire()
+        #Off_aire()
     elif sensor == '17':
         print("Sensor Presion Barometrica apagado")
-        Off_Presure_Barometric()
+        #Off_Presure_Barometric()
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -157,15 +162,16 @@ def Off_Sensor():
 #* Funcion para obtener las estadisticas del sensor seleccionado
 @app.route('/api/stats', methods=['GET'])
 def Estadistics_Sensor():
+    global datos
     # Aquí es donde obtendrías los datos del sensor en la vida real
     data = {
-        "labels": ['Promedio', 'Mediana', 'DesviacionEstandar', 'Máximo', 'Mínimo', 'Moda'],
+        "labels": datos,
         "datasets": [
             {
                 "label": 'Revenue',
                 "backgroundColor": '#4e73df',
                 "borderColor": '#4e73df',
-                "data": [resultados[0], resultados[1], resultados[2], resultados[3], resultados[4], resultados[5]],
+                "data": datos,
             },
         ],
     }
@@ -174,6 +180,8 @@ def Estadistics_Sensor():
 #* Funcion para obtener los datos del sensor seleccionado
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
+    global resultados
+    resultados = []
     # Aquí es donde obtendrías los datos del sensor en la vida real
     calculos_estadisticos()
     data = {
@@ -423,6 +431,50 @@ def calculos_estadisticos():
     
     resultados = []
     
+    #*---------------------------------------------------------
+    #* Calculo para el promedio arm 64 bits
+    # Cargar la librer�a compartida
+    lib = ctypes.CDLL('./Calculos/Media/libcalcular_media.so')
+
+    # Definir el prototipo de la funci�n
+    lib.calcular_media.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int]
+    lib.calcular_media.restype = ctypes.c_float
+
+    # Definir el arreglo de n�meros
+    num_elements = len(datos)
+
+    # Convertir el arreglo a un tipo que ctypes pueda manejar
+    ArrayType = ctypes.c_float * num_elements
+    c_array = ArrayType(*datos)
+
+    # Llamar a la funci�n para calcular la media
+    mean_value = lib.calcular_media(c_array, num_elements)   
+    mean_value = round(mean_value, 3)
+    resultados.append(mean_value)
+
+    #*---------------------------------------------------------
+    #* Calculo para la mediana arm 64 bits
+    # Cargar la librer�a compartida
+    lib = ctypes.CDLL('./Calculos/Mediana/mediana.so')
+    # Definir el prototipo de la funci�n
+    lib.calcular_mediana.argtypes = [ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+    lib.calcular_mediana.restype = ctypes.c_double
+
+    # Definir el arreglo de n�meros y el tama�o
+    num_elements = len(datos)
+
+    # Convertir el arreglo a un tipo que ctypes pueda manejar
+    c_array = (ctypes.c_double * num_elements)(*datos)
+
+    # Convertir el tama�o a un tipo que ctypes pueda manejar
+    c_size = ctypes.c_int(num_elements)
+
+    # Llamar a la funci�n y obtener la mediana
+    result = lib.calcular_mediana(c_array, c_size)
+    result = round(result, 3)
+    resultados.append(result)
+
+
     #* Calculo para la Desviacion Estandar arm 64 bits
     # Cargar la libreria compartida
     lib = ctypes.CDLL('./Calculos/desEstandar/desEstandar.so')
@@ -440,26 +492,74 @@ def calculos_estadisticos():
 
     # Llamar a la funcion y obtener el resultado
     desEstandar = lib.desEstandar(c_array, num_elements)
-    
+    desEstandar = round(desEstandar, 3)
     resultados.append(desEstandar)
     
     #*---------------------------------------------------------
-    #* Calculo para la Mediana arm 64 bits
-    # Cargar la libreria compartida
-    lib = ctypes.CDLL('./Calculos/Mediana/mediana.so')
-    
-    # Definir el prototipo de la funcion
-    lib.mediana.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
-    lib.mediana.restype = ctypes.c_float
+    #* Calculo para el maximo arm 64 bits
+    # Cargar la librer�a compartida
+    lib = ctypes.CDLL('./Calculos/Max/libcalcular_maximo.so')
 
-    # Llamar a la funcion y obtener el resultado
-    mediana = lib.mediana(c_array, num_elements)
+    # Definir el prototipo de la funci�n
+    lib.calcular_maximo.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int]
+    lib.calcular_maximo.restype = ctypes.c_float
+
+    # Definir el arreglo de n�meros
+    num_elements = len(datos)
+
+    # Convertir el arreglo a un tipo que ctypes pueda manejar
+    ArrayType = ctypes.c_float * num_elements
+    c_array = ArrayType(*datos)
+
+    # Llamar a la funci�n para calcular el m�ximo
+    max_value = lib.calcular_maximo(c_array, num_elements)
+    max_value = round(max_value, 3)
+    resultados.append(max_value)
     
-    resultados.append(mediana)
+    #*---------------------------------------------------------
+    #* Calculo para el minimo arm 64 bits
+    # Cargar la librer�a compartida
+    lib = ctypes.CDLL('./Calculos/Min/libcalcular_minimo.so')
+
+    # Definir el prototipo de la funci�n
+    lib.calcular_minimo.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int]
+    lib.calcular_minimo.restype = ctypes.c_float
+
+    # Definir el arreglo de n�meros
+    num_elements = len(datos)
+
+    # Convertir el arreglo a un tipo que ctypes pueda manejar
+    ArrayType = ctypes.c_float * num_elements
+    c_array = ArrayType(*datos)
+
+    # Llamar a la funcion para calcular el m�nimo
+    min_value = lib.calcular_minimo(c_array, num_elements)
+    min_value = round(min_value, 3)
+    resultados.append(min_value)
+
+    #*---------------------------------------------------------
+    #* Calculo para la moda arm 64 bits
+    # Cargar la librer�a compartida
+    lib = ctypes.CDLL('./Calculos/Moda/libcalcular_moda.so')  # Ajusta la ruta y nombre del archivo .so seg�n tu configuraci�n
+
+    # Definir el prototipo de la funci�n
+    lib.calcular_moda.argtypes = (ctypes.POINTER(ctypes.c_float), ctypes.c_int)
+    lib.calcular_moda.restype = ctypes.c_float  # La funci�n retorna el valor de la moda (float)
+
+    # Convertir el arreglo a un tipo que ctypes pueda manejar
+    ArrayType = ctypes.c_float * len(datos)
+    c_array = ArrayType(*datos)
+
+    num_elements = len(datos)
+
+    # Llamar a la funci�n calcular_moda
+    mode_value = lib.calcular_moda(c_array, num_elements)
+    mode_value = round(mode_value, 3)
+    resultados.append(mode_value)
 
     #Resultados de la calidad de aire
-    cont1 = lib.conteo1(c_array, len(datos))
-    cont0 = lib.conteo0(c_array, len(datos))
+    #cont1 = lib.conteo1(c_array, len(datos))
+    #cont0 = lib.conteo0(c_array, len(datos))
     
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
