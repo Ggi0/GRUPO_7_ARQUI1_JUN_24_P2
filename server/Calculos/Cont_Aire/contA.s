@@ -1,4 +1,5 @@
-conteo1:
+
+onteo1:
     // Los primeros dos argumentos (el arreglo y su longitud) se pasan en los registros x0 y x1
     // Inicializar d0 (que usaremos para la suma) a 0
     mov w2, #0

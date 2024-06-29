@@ -22,9 +22,15 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=T
 
 # ------------------------ DATOS --------------------------
 datos = []
+datos_aire = []
 resultados = []
+resultados_aire = []
+estado_actual = ["", "", "", "", "", "" ]
 
 # ----------------------------VARIABLES ----------------------
+
+#sensor en uso
+sensor_id = None
 
 
 #globales para sensor de calidad de aire
@@ -98,29 +104,29 @@ def On_Sensor():
     #* Aqui se debe de agregar la logica para encender el sensor
     if   sensor == '12':
         print("Sensor Temperatura encendido")  
-        #On_Temp_Hum('temp')
-        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+        On_Temp_Hum('temp')
+        #datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
 
     elif sensor == '13':
         print("Sensor Humedad encendido")
-        #On_Temp_Hum('hum')
-        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+        On_Temp_Hum('hum')
+        #datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '14':
         print("Sensor Velocidad viento encendido")
-        #On_Viento()
-        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+        On_Viento()
+        #datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '15':
         print("Sensor Luminosidad encendido")
-        #On_luminosidad()
-        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+        On_luminosidad()
+        #datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '16':
         print("Sensor Calidad de aire encendido")
-        #On_aire()
-        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+        On_aire()
+        #datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     elif sensor == '17':
         print("Sensor Presion Barometrica encendido")
-        #On_Presure_Barometric()
-        datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
+        On_Presure_Barometric()
+        #datos = [round(random.uniform(0.0, 100.0), 2) for _ in range(10)]
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -129,8 +135,10 @@ def On_Sensor():
 #* Funcion para apagar el sensor seleccionado
 @app.route('/api/off', methods=['POST'])
 def Off_Sensor():
+    global sensor_id
     data = request.get_json()
     sensor = data.get('sensor')
+    sensor_id = sensor
     
     if sensor is None:
         return jsonify({'error': 'sensor and action are required'}), 400
@@ -138,22 +146,22 @@ def Off_Sensor():
     #* Aqui se debe de agregar la logica para apagar el sensor
     if   sensor == '12':
         print("Sensor Temperatura apagado")  
-        #Off_Temp_Hum()
+        Off_Temp_Hum()
     elif sensor == '13':
         print("Sensor Humedad apagado")
-        #Off_Temp_Hum()
+        Off_Temp_Hum()
     elif sensor == '14':
         print("Sensor Velocidad viento apagado")
-        #Off_Viento()
+        Off_Viento()
     elif sensor == '15':
         print("Sensor Luminosidad apagado")
-        #Off_luminosidad()
+        Off_luminosidad()
     elif sensor == '16':
         print("Sensor Calidad de aire apagado")
-        #Off_aire()
+        Off_aire()
     elif sensor == '17':
         print("Sensor Presion Barometrica apagado")
-        #Off_Presure_Barometric()
+        Off_Presure_Barometric()
     else:
         return jsonify({'message': 'invalid sensor'}), 400
     
@@ -181,24 +189,48 @@ def Estadistics_Sensor():
 @app.route('/api/data', methods=['GET'])
 def Data_Sensor():
     global resultados
+    global sensor_id
     # Aquí es donde obtendrías los datos del sensor en la vida real
     calculos_estadisticos()
-    print (resultados)
 
-
-    data = {
-        "Promedio": resultados[0],
-        "Mediana": resultados[1],
-        "DesEstandar": resultados[2],
-        "Max": resultados[3],
-        "Min": resultados[4],
-        "Moda": resultados[5]
+    if sensor_id == '16':
         
-    }
+        data = {"Promedio": 0,
+            "Mediana": 0,
+            "DesEstandar": 0,
+            "Max": 0,
+            "Min": 0,
+            "Moda": 0,
+            "Conteo": 0,
+            "Conteo1": resultados_aire[0], #aire bueno
+            "Conteo0": resultados_aire[1] #aire malo
+        }
+    else:
+        calculos_aire()
+        print(resultados_aire)
+        data = {
+            "Promedio": resultados[0],
+            "Mediana": resultados[1],
+            "DesEstandar": resultados[2],
+            "Max": resultados[3],
+            "Min": resultados[4],
+            "Moda": resultados[5],
+            "Conteo": resultados[6],
+            "Conteo1": 0, #aire bueno
+            "Conteo0": 0 #aire malo
+            
+        } 
+
+    
     return jsonify(data)
 
 
+
+
 # ------------------------- FUNCIONES ---------------------------
+
+
+
 
 #* Funcion para encender el sensor de calidad de aire
 def On_aire():
@@ -214,6 +246,8 @@ def On_aire():
 
     print("Leyendo datos de la calidad de aire de la zona...")
 
+
+
 def clasificacion(analog_value):
     global datos
     datos = []
@@ -226,10 +260,13 @@ def clasificacion(analog_value):
     if co2_concentration < 1000:
         print("Buena")
         datos.append(1)
+        estado_actual.append("Buena")
+        estado_actual.insert(4, "Buena")
 
     else:
         print("Mala")
         datos.append(0)
+        estado_actual.insert(4, "Mala")
 
 def read_ao0():
     global PCF8591_ADDRESS
@@ -268,12 +305,20 @@ def On_Temp_Hum(tipo_sensor):
             humidity = dht_device.humidity
 
             # Imprimir los valores le�dos
-            print(f"Temperatura: {temperature_c:.1f} �C")
+            print(f"Temperatura: {temperature_c:.1f} C")
             print(f"Humedad: {humidity:.1f} %")
+            
             if tipo_sensor == 'temp':
+                temperature_c = round(temperature_c, 2)
                 datos.append(temperature_c)
+                temperature_c = str(temperature_c) + " C"
+                estado_actual.insert(0, temperature_c)
+                
             else:
+                humidity = round(humidity, 2)
                 datos.append(humidity)
+                humidity = str(humidity) + " %"
+                estado_actual.insert(1, humidity)
 
 
         except RuntimeError as error:
@@ -340,10 +385,14 @@ def On_Viento():
             # Imprimir las RPM
             print(f"Velocidad de rotaci�n: {rpm:.2f} RPM")
             
+            
             # Reiniciar el contador y el tiempo
             counter = 0
             start_time = time.time()
+            rpm = round(rpm, 2)
             datos.append(rpm)
+            rpm = str(rpm) + " RPM"
+            estado_actual.insert(2,rpm )
             time.sleep(10)
 
 
@@ -367,6 +416,10 @@ def Luminosidad_analogo(channel):
     bus.write_byte(PCF8591_ADDRESS, 0x40 | channel)
     bus.read_byte(PCF8591_ADDRESS)  # leer una vez para iniciar la conversiï¿½n
     value = bus.read_byte(PCF8591_ADDRESS)
+    
+    
+    
+    
     return value
 
 
@@ -374,11 +427,31 @@ def On_luminosidad():
     global sensor_luminosidad
     sensor_luminosidad = True
     global datos    
-    datos.clear()
+    datos = []
 
     while sensor_luminosidad:
         analog_value = Luminosidad_analogo(1)  # Leer desde el canal AO1
         print("Valor analogico leido desde AO1: ", analog_value)
+        analog_value = round(analog_value, 2)
+        datos.append(analog_value)
+        
+        # Interpretaciï¿½n de los valores
+        if analog_value > 200:
+            print("Nublado")
+            estado_actual.insert(3, "Nublado")
+        elif 150 < analog_value <= 200:
+            print("Nublado")
+            estado_actual.insert(3, "Nublado")
+        elif 100 < analog_value <= 150:
+            print("Luz solar")
+            estado_actual.insert(3, "Luz solar")
+        elif 50 < analog_value <= 100:
+            print("Luz solar")
+            estado_actual.insert(3, "Luz solar")
+        else:
+            print("Muy iluminado")
+            estado_actual.insert(3, "Muy iluminado")
+        
         time.sleep(10)
         
         
@@ -411,8 +484,13 @@ def On_Presure_Barometric():
         print(f"Presion: {presion:.2f} hPa")
         print(f"Altitud: {altitud:.2f} m")
         
+        
+        
         # Agrega el valor de la presion a la lista
+        presion = round(presion, 2)
         datos.append(presion)
+        presion = str(presion) + " hPa"
+        estado_actual.insert(5, presion)
 
         # Esperar un segundo antes de la pr�xima lectura
         time.sleep(10)
@@ -429,8 +507,10 @@ def Off_Presure_Barometric():
 
 def calculos_estadisticos():
     global datos 
+
     global lib
     global resultados
+
     
     resultados = []
     
@@ -559,10 +639,30 @@ def calculos_estadisticos():
     mode_value = lib.calcular_moda(c_array, num_elements)
     mode_value = round(mode_value, 3)
     resultados.append(mode_value)
+    
+    lib = ctypes.CDLL('./Calculos/Contador/cont.so')
+    lib.conteo.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.c_int]
+    lib.conteo.restype = ctypes.c_float
+    
+    cont_value = lib.conteo(c_array, len(datos))
+    cont_value = round(cont_value, 3)
+    resultados.append(cont_value)
 
-    #Resultados de la calidad de aire
-    #cont1 = lib.conteo1(c_array, len(datos))
-    #cont0 = lib.conteo0(c_array, len(datos))
+    
+def calculos_aire():
+    global datos_aire
+    global resultados_aire
+    
+    lib = ctypes.CDLL('./Calculos/Cont_Aire/contA.so')
+    c_array = (ctypes.c_int * len(datos_aire))(*datos_aire)
+    lib.conteo1.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.c_int]
+    lib.conteo1.restype = ctypes.c_int
+    
+    cont1 = lib.conteo1(c_array, len(datos_aire))
+    cont0 = lib.conteo0(c_array, len(datos_aire))
+    
+    resultados_aire.append(cont1)
+    resultados_aire.append(cont0)
     
 
 #* El try es para manejar los errores que se puedan presentar en el servidor
