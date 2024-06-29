@@ -71,6 +71,8 @@ function App() {
     "Min": 0,
     "Moda": 0,
     "Conteo": 0,
+    "Conteo1": 0,
+    "Conteo0": 0,
   });
 
   const handleButtonUpdate = (url) => {
